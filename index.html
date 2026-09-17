@@ -1,471 +1,519 @@
-<!doctype html>
-<html lang="zh-Hant"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>青溪國小 3Q達人評選</title>
-<style>
-:root{--ink:#17312d;--muted:#64756f;--green:#196b54;--line:#d8e3dd}*{box-sizing:border-box}body{margin:0;background:#f4f6f2;color:var(--ink);font-family:system-ui,"Microsoft JhengHei",sans-serif;line-height:1.7}header,main,.wrap{max-width:960px;margin:auto;padding:24px}header{padding-top:42px}h1{font-size:clamp(24px,5vw,34px);margin:5px 0 12px;letter-spacing:.03em}.eyebrow{color:var(--green);font-size:13px;letter-spacing:.12em;font-weight:700}p{margin:8px 0}.muted{color:var(--muted)}.intro{display:flex;justify-content:space-between;gap:28px;align-items:center}.identity{min-width:250px}label{display:block;font-weight:650}select,input,button{font:inherit}select{width:100%;padding:12px;border:1px solid var(--line);border-radius:9px;background:white}button{cursor:pointer;border:1px solid var(--line);border-radius:9px;padding:10px 16px;background:white;color:var(--ink)}button:disabled{cursor:not-allowed;opacity:.5}button:focus-visible,select:focus-visible,input:focus-visible{outline:3px solid #e0a947;outline-offset:3px}.nav{position:sticky;top:0;background:#f4f6f2f5;backdrop-filter:blur(10px);z-index:2;border-block:1px solid var(--line)}.nav .wrap{padding-block:12px}.tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.tab.active{background:var(--green);color:white;border-color:var(--green)}.tab small{display:block;font-size:12px}.progress{display:flex;align-items:center;justify-content:space-between;margin-top:12px;gap:12px}.bar{height:5px;background:#dce6df;border-radius:8px;margin-top:8px}.bar span{display:block;background:var(--green);height:100%;border-radius:8px}.notice{padding:12px 15px;border-radius:8px;background:#e8efe9;margin-top:14px;font-size:14px}.error{background:#fff0dd;color:#734b0c}.hidden{display:none!important}.student{border:1px solid var(--line);background:white;border-radius:14px;margin:0 0 20px;padding:24px}.student-head{display:flex;gap:16px;align-items:start;justify-content:space-between}.student h3{font-size:23px;margin:0}.index{color:var(--muted);font-size:12px}.tags{display:flex;gap:6px;flex-wrap:wrap;margin:14px 0}.tag{font-size:12px;padding:3px 9px;border-radius:5px;background:#edf3ed;color:#426352}.story{white-space:pre-wrap;line-height:1.95;font-size:16px;margin:18px 0 24px;overflow-wrap:anywhere}.score{display:flex;justify-content:space-between;align-items:center;gap:12px;border-top:1px solid var(--line);padding-top:18px}.score label{font-size:15px}.score input{width:100px;padding:9px;border:1px solid #a9bdb0;border-radius:8px;font-size:22px;font-weight:700;text-align:center;color:var(--green)}input:invalid{border-color:#af4d30}.score small{display:block;color:var(--muted);font-weight:400}.bottom{position:sticky;bottom:0;background:#fffffff5;border-top:1px solid var(--line);padding:12px 0;z-index:3}.bottom .wrap{padding-block:0;display:flex;gap:15px;align-items:center;justify-content:space-between}.primary{background:var(--green);border-color:var(--green);color:white;font-weight:700;min-width:160px}.conflict button{margin:8px 8px 0 0}h2{font-size:20px;margin:0 0 18px}footer{max-width:960px;margin:auto;padding:18px 24px 30px;color:var(--muted);font-size:12px}#message:empty{display:none}@media(max-width:640px){header,main,.wrap{padding:16px}header{padding-top:24px}.intro{display:block}.identity{margin-top:20px}.student{padding:18px}.tabs{gap:6px}.tab{padding:9px 5px;font-size:14px}.student-head{gap:8px}.student h3{font-size:21px}.bottom .wrap{gap:8px}.primary{min-width:140px}.bottom small{font-size:12px}.progress{font-size:14px}}
-</style></head><body>
-<header><div class="eyebrow">青溪國小 · 六年級 · 115學年度</div><div class="intro"><div><h1>3Q達人評選</h1><p class="muted">閱讀每位孩子的故事，留下您的評分。<br>每類別完成後可先儲存，稍後再繼續。</p></div><div class="identity"><label for="judge">評審委員</label><select id="judge"><option value="">請選擇您的姓名</option></select></div></div><div id="mode" class="notice hidden"></div><div id="storageError" class="notice error hidden">本機暫存不可用，離開頁面可能遺失未送出分數。請先匯出草稿或完成雲端儲存。</div><div id="message" role="status" aria-live="polite" class="notice"></div></header>
-<nav class="nav" aria-label="評分類別"><div class="wrap"><div class="tabs" role="tablist"></div><div class="progress"><span id="progress">請先選擇評審姓名</span><button id="sync" type="button">重新同步</button></div><div class="bar" role="progressbar" aria-label="本類填寫進度" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><span></span></div></div></nav>
-<main><div id="conflict" class="notice error conflict hidden"><strong>雲端分數與本機草稿不同</strong><p>本機修改已保留。選擇這次要繼續使用的版本；保留本機後仍須按儲存才會更新雲端。</p><button id="useCloud">使用雲端版本</button><button id="keepLocal">保留本機草稿</button></div><h2 id="heading">AQ 逆境智商</h2><div id="candidates"></div></main>
-<div class="bottom"><div class="wrap"><small id="saveInfo">輸入即暫存於這部裝置</small><button id="save" class="primary" disabled>儲存此類別</button></div></div>
-<footer>0～100分，可使用小數。評分僅供評選使用。<button id="backup">匯出本機草稿</button></footer>
-<script id="app-data" type="application/json">{
-  "eventId": "qingxi-115-3q-v1",
-  "judgesList": [
-    "詹世羽 老師",
-    "游智媚 老師",
-    "李嘉傑 老師",
-    "陳玟婷 老師",
-    "陳佩欣 老師",
-    "李偉甄 老師"
-  ],
-  "pendingJudges": "四處主任／行政委員姓名待補；每人須有獨立選項",
-  "deadline": null,
-  "candidatesData": {
-    "AQ": [
-      {
-        "id": "AQ-601",
-        "class": "6年1班",
-        "name": "張立欣",
-        "teacher": "童奕儒",
-        "reasons": [
-          "良好挫折復原力",
-          "積極樂觀面對挑戰",
-          "不屈不撓表現卓越"
-        ],
-        "story": "我喜歡的運動非常多，圍棋也包括在內。記得半年前剛升上二段的我還弱弱的，所以在棋院下棋都常常輸，去比賽也只獲得一兩勝而已，所以當時的我對於自己的實力越來越沒有信心。\n\n直到有一次，我在下棋時突然發現了一個問題，我的死活(圍棋用語)太差了，很容易就被對方殺死。所以我開始去向老師與同學學習，觀察其他人在下棋時如何克服同樣的難題。在一番努力後，終於開始逆轉，我開始能在和其他人對戰時獲勝。獲勝後我既開心又覺得內心鬆了一口氣，心想：「皇天不負苦心人啊！」\n\n最近我又改善了許多弱點，讓實力提升了不少，現在也慢慢地可以打敗其他人了。再過不久我即將要去參加比賽，希望我可以五戰全勝，升上三段！"
-      },
-      {
-        "id": "AQ-602",
-        "class": "6年2班",
-        "name": "楊依芃",
-        "teacher": "藍婷",
-        "reasons": [
-          "良好挫折復原力",
-          "積極樂觀面對挑戰",
-          "不屈不撓表現卓越"
-        ],
-        "story": "我其實從以前就一直非常討厭游泳，每次面對那可怕的泳池和換氣的挑戰時，我每次都害怕到心跳超快！甚至真的想立刻消失在那！而且我們的游泳課大部分都是在冷到快要變成冷凍蔬菜的冬天上的，然後每次從水裡上來都冷到快感冒，所以我才會這麼的討厭游泳課。\n\n可是！不管在游泳池裡有多害怕、多討厭，我都沒有想說要放棄，反而我還會先叫自己冷靜下來，並再去挑戰那些我曾經出錯過的動作，一邊看著老師耐心教我、一邊在仔細想想最有效的解決方法，我就輕鬆，然後在旁邊一次次的練習老師剛才教的東西，終於！我在那一次居然就學會了！當下我真的覺得我的努力都值得了！"
-      },
-      {
-        "id": "AQ-603",
-        "class": "6年3班",
-        "name": "陳妍菱",
-        "teacher": "梅宸葳",
-        "reasons": [
-          "良好挫折復原力",
-          "積極樂觀面對挑戰",
-          "不屈不撓表現卓越"
-        ],
-        "story": "4年級時，我看到同學在用鉤針織東西，那時我在旁邊看得很有興趣。五年級創資班自學課，老師說每個人要選一個主題進行自學研究，我當然毫不猶豫選擇毛線鉤針編織。\n\n一開始在編織的時候，我還沒有掌握編織的技巧，因此我常常搞錯編織的順序，因而編得亂七八糟，只好不斷地拆線繼續編織。因為我想要快一點完成預計的作品，所以後來我就在家裡使用筆電查針法與預習下次的進度，透過這樣過程讓自己不斷精進編織技術。\n\n而當我正式在編織時，倘若遇到不會的針法或忘記要怎麼編時，我就會借學校（創資）的電腦再複習幾次。如果我同一個步驟忘記太多次因而必須頻繁地查閱電腦時，我就會利用編織專門的符號畫圖記錄，這樣下次就不用一直開電腦。如果在編織的過程時發現有錯，但是我編到的地方距離我編錯的地方有點遠，我還是照樣把線拉掉，到我編錯的地方重新編織好。"
-      },
-      {
-        "id": "AQ-604-1",
-        "class": "6年4班",
-        "name": "李珮朮",
-        "teacher": "周琬玲",
-        "reasons": [
-          "積極樂觀面對挑戰"
-        ],
-        "story": "三、四年級時，我參加了學校舉辦的「領袖營」。其中一次活動，是挑戰爬草嶺古道。\n\n我們從山腳一路往上爬，原本是涼爽舒適的陰天，沒想到爬到半山腰時，天空突然下起了大雨！山上的氣溫也驟降到只有9度。雖然我戴著手套和帽子，雙手和臉還是被凍得紅通通的。更糟的是，雨水滲進手套裡，讓我的雙手冷得幾乎失去知覺。我們已經爬了一半，只能硬著頭皮繼續前進。\n\n途中有地方可以休息、吃東西和上廁所，我趕緊拿出食物充飢。休息過後，我們繼續往山頂前進。因為下過雨，石階又濕又滑，每一步都要非常小心，幸好有登山杖的幫助。一路上，我們經歷了寒冷、大雨和濕滑的石階等重重困難，但大家互相鼓勵，沒有放棄。最後，我們終於成功登頂！就在我們抵達山頂時，天空也放晴了，陽光彷彿在為我們的堅持與成功歡呼。這次經驗讓我明白，只要堅持到底，再困難的事情也能成功。"
-      },
-      {
-        "id": "AQ-604-2",
-        "class": "6年4班",
-        "name": "陳可旭",
-        "teacher": "周琬玲",
-        "reasons": [
-          "積極樂觀面對挑戰"
-        ],
-        "story": "我是一個常常使用電腦寫程式的學生。有時候在設計遊戲時，可能會遇到角色移動、控制、函數整合等問題，常常需要花費大量的時間，重新一步一步觀察程式，找出裡面隱藏的「蟲子（Bug）」，並想辦法把它們消除，但我從不輕易放棄，因為做出有趣的遊戲，讓人收藏是一件非常有成就感的事情。\n\n今年一月時，學校舉辦攀登高山的活動，從嘉義平地搭車上升至2845公尺的鹿林山，由於上坡路段較多，路況崎嶇，再加上寒風和高山低溫，讓人感到十分不舒服。沿路高山森林的自然景色不斷變化，天空還下起了冰霰，那是我第一次看到類似冰雹和雪的景象！登高山空氣稀薄，走起路來更像是有重重的石頭壓在腳上…但我一想到晚上可以吃到美味的烤肉大餐，還能躺在溫暖的床鋪上休息，於是咬牙堅持，最後順利抵達終點，也蒐集到了我人生的第一座台灣百嶽。\n\n我覺得，不管做什麼事情，面對挫折的能力都非常重要，有時候不能因為一點點困難就選擇放棄，有時跳脫舒適圈，才能有更有趣的收穫！"
-      },
-      {
-        "id": "AQ-605",
-        "class": "6年5班",
-        "name": "黃少騏",
-        "teacher": "鄒芬芳",
-        "reasons": [
-          "良好挫折復原力",
-          "不屈不撓表現卓越"
-        ],
-        "story": "【獲獎經歷】\n1. 114學年度全國學生音樂比賽弦樂合奏國小組優等\n2. 114學年度(桃園)市內初賽奪下特優\n3. 113學年度(2024-2025)弦樂合奏國小組「特優第一名」\n\n一開始小學上C團的時候，我覺得小提琴很難，那時候連拉完一首曲子都沒辦法，我記得第一天上團課時，握弓的姿勢不知為什麼很醜，所幸在老師指導下終於會握了。第2堂課教小星星，拉得不是很順暢，經過教導終於可以拉完整首。升上B團曲子更難，需要花費更多時間練習；升上A團後又是完全不同層級，不是超級高音就是超級低音。\n\n接著大型比賽來了，不到3個月練習，比賽前老師還會考試，不會的人要在外面對著柱子拉500遍練習到手長繭，但我都沒有放棄繼續完成它。終於皇天不負苦心人，在比賽前我順利的拉好曲子。比賽當天我告訴自己「我一定可以做到」，最後在弦樂團全部人的努力下拿下第一名。"
-      },
-      {
-        "id": "AQ-606",
-        "class": "6年6班",
-        "name": "劉芷齊",
-        "teacher": "徐慧萱",
-        "reasons": [
-          "良好挫折復原力",
-          "積極樂觀面對挑戰",
-          "不屈不撓表現卓越"
-        ],
-        "story": "我覺得我是AQ逆境智商達人，因為在遇到困難時，我總是能展現良好的挫折容忍力。每一周星期六，我都要考試和上課，有時候考得很好，會讓媽媽很高興，但如果考不好時，媽媽就會說：「你的分數可不可以不要像遊樂園裡的雲霄飛車一樣，有時高而有時低可不可以？」。\n\n但是，在我心中，我一點也不在意，因為我覺得這一次沒有考好，下一次再努力就好，所以我一點都不在意我媽媽罵了我什麼，因為睡一覺起來就忘了我媽昨天晚上罵我什麼了。\n\n此外，我也願意接受挑戰，雖然桌遊上的盒子上寫說十二歲以上才可以玩，但我還是想挑戰看看，於是就拉著爸爸的手，叫他一起陪我組積木，沒想到最後還能順利完成任務，因為這次的經驗，讓我知道凡事遇到困難或是在逆境中，不要隨意幫自己設限，對自己多一點信心，可以多多嘗試，就能挖掘自己的潛力，這也是AQ達人的精神。"
-      },
-      {
-        "id": "AQ-607",
-        "class": "6年7班",
-        "name": "徐至謙",
-        "teacher": "陳榕烝",
-        "reasons": [
-          "良好挫折復原力",
-          "不屈不撓表現卓越"
-        ],
-        "story": "自從四年級暑假開始，我進入了一間名為「興儒」的補習班。那裡每個星期六都會進行嚴格的考試與排名，對當時的我來說，週週揭曉的競爭舞台就像人間地獄般，充滿了巨大的壓力和折磨。\n\n雖然在高手雲集的環境中維持頂尖非常疲累，但我從未選擇逃避，而是告訴自己要保持樂觀的心態。我試著轉換思考方向、積極「往外看」，不把排名當作患得患失的包袱，而是將它視為不斷突破自我的動力。\n\n這種彈性的思維讓我面對高壓時依然能靜下心來，維持穩定的學習節奏。經過一次次的考驗，這段經歷長遠地影響了我。它讓我深刻體會到，高壓的逆境是鍛鍊心智最好的養分，只要維持正向想法，就能在競爭中愈挫愈勇，成為真正的逆境達人。"
-      },
-      {
-        "id": "AQ-608",
-        "class": "6年8班",
-        "name": "林群展",
-        "teacher": "林宜橙",
-        "reasons": [
-          "積極樂觀面對挑戰"
-        ],
-        "story": "在這個暑假，我爸為了讓我像哥哥一樣成績優秀，並考上私中，特別為我買了銜接國一的線上課程。課程內容極度困難，不管是國文還是數學，每一科都不放過。國文科古文、大考試題，數學進階練習、資優挑戰題，難到我燒破腦筋都想不出答案，即便如此，我不但毫無畏懼，反而更加興奮。\n\n解鎖我未發現的新知識，對我而言是非常有趣的事，當然也有難題讓我不斷陷入瓶頸，不過我不會因此一蹶不振，而是從哪跌倒就從哪站起，從不輕易氣餒。\n\n學數學我不單單只是一直死背公式，我會自己發揮創意，提出與老師迥然不同的想法，不會一味的把老師說的解法或重點抄在講義上，而自己的頭腦都不思考，過個幾天就忘的一乾二淨，我希望自己正向積極的學習態度可以一直不斷的持續，讓我不間斷的進步，達到心中所滿意的目標。"
-      },
-      {
-        "id": "AQ-609",
-        "class": "6年9班",
-        "name": "蔡汯嶧",
-        "teacher": "張芯",
-        "reasons": [
-          "積極樂觀面對挑戰"
-        ],
-        "story": "我是AQ達人，因為我遇到困難時，不會輕易放棄。像是老師交代的事情，或是遇到不會的數學題時，我都會先自己想辦法解決，直到真的想不出來，才會停下來尋求幫助。\n\n例如寫數學題時，如果遇到不會的題目，我會先仔細讀題，想想看可以用什麼方法解決。如果第一次算錯了，我不會馬上放棄，而是重新檢查算式，看看是哪一個步驟出了問題，再重新計算一次，直到找到正確的答案。\n\n如果試了很多次還是想不出來，我也不會因為害怕被笑而放棄，而是主動詢問同學或老師，請他們提醒我解題的方法。不過，我不會直接抄別人的答案，而是先聽懂解題的方法，再試著靠自己的力量完成。\n\n我覺得遇到困難時，最重要的就是不要輕易放棄。只要有耐心，多嘗試幾次，就有機會找到解決的方法。困難並不可怕，可怕的是還沒有努力，就先選擇放棄。只要願意堅持、勇敢面對，我相信自己一定能克服更多的挑戰。"
-      },
-      {
-        "id": "AQ-610-1",
-        "class": "6年10班",
-        "name": "邱郁涵",
-        "teacher": "林湘妮",
-        "reasons": [
-          "良好挫折復原力",
-          "不屈不撓表現卓越"
-        ],
-        "story": "這個炎熱的暑假，我多學了一個在我心目中特別的樂器這就被叫作：「長號」，它也有別名叫做:「伸縮喇叭」，我為什麼會覺得它很特別的原因就是因為它只有一個按鍵其他的音都是靠感覺去拉，所以它非常的難，但是一開始我不知道它很難所以我就選了！\n\n每次分部課上完我們大家都會留下來繼續吹，但因為我少上了一次課，所以速度有一點落後，即使我被同學笑我也覺得沒有關係，我只希望我能趕快跟上進度，逃出逆境，往最好的方向和最適合我成功的那一條路，以上這些我認為我是個AQ小達人。"
-      },
-      {
-        "id": "AQ-610-2",
-        "class": "6年10班",
-        "name": "鄭子睿",
-        "teacher": "林湘妮",
-        "reasons": [
-          "積極樂觀面對挑戰",
-          "不屈不撓表現卓越"
-        ],
-        "story": "二年級升三年級的第一次考試，全班都考不好，我甚至考了不及格，但是我沒有難過，而是在反省自己哪裡沒有做好。雖然二年級的期末考得分有很好，到了四年級成績有在慢慢變好，但我一樣沒有鬆懈，一樣繼續努力讀書，準備下一次的考試。\n\n五年級就是重新的時候了，我也馬上進入狀況，即使期中考考得不好我也沒有放棄，一直繼續努力讀書。五年級最後一次考試，我信心十足，考試考得非常順利，內心安穩。王老師還說有機會前二名，雖然只得到進步獎，但已經足夠了。"
-      }
-    ],
-    "EQ": [
-      {
-        "id": "EQ-601",
-        "class": "6年1班",
-        "name": "潘妍希",
-        "teacher": "童奕儒",
-        "reasons": [
-          "良好情緒管理能力",
-          "溝通能力良好",
-          "樂觀能影響他人"
-        ],
-        "story": "比賽結果揭曉的那一刻，看著榜單上沒有自己的名字，心裡湧上難過和失落。眼淚在眼眶裡打轉，難過是難免的，畢竟這段日子以來的努力和汗水，誰都希望能換來閃亮的獎盃。\n\n但擦乾眼淚之後，這場比賽並沒有結束。我學著靜下來反省，回想過程中的每一個細節，找出可以做得更好的地方，這不是自我否定，而是讓自己變得更強大的養分。\n\n轉頭看見身邊同樣紅著眼眶的同伴，我收起自己的沮喪，拍拍他們的肩膀說：「沒關係，我們已經盡全力了，下次再一起加油吧！」\n\n原來比賽沒有得名並不可怕，比賽教會我們的是怎麼面對失敗和失落，透過反省學習謙卑。用同理心去擁抱彼此的淚水，這份溫柔和堅強，比任何獎牌都還要珍貴。"
-      },
-      {
-        "id": "EQ-602",
-        "class": "6年2班",
-        "name": "陳佑安",
-        "teacher": "藍婷",
-        "reasons": [
-          "良好情緒管理能力",
-          "設身處地為人著想"
-        ],
-        "story": "EQ 是具有良好的情緒管理能力，能設身處地為別人著想，這是我們人人都要有的能力。\n\n不僅能體諒別人，別人也會想要跟你當朋友，就會有良好的人際關係。且能積極樂觀影響別人，使氣氛更加和諧，就可以改變團體氛圍，讓大家都能用樂觀的心態面對事情。換做是我的話，遇到挫折我也會先放鬆自己，再以良好心態去克服難關。"
-      },
-      {
-        "id": "EQ-603",
-        "class": "6年3班",
-        "name": "施品妍",
-        "teacher": "梅宸葳",
-        "reasons": [
-          "良好挫折復原力",
-          "不屈不撓愈挫愈勇"
-        ],
-        "story": "EQ 是生活中很常聽見的名詞，也是現代生活中很重要的能力。有一次同學們一起合作畫畫，大家都很堅持自己的想法，雖然我也有自己不同的意見，但我選擇了傾聽同學們的想法，配合大家一起合力完成畫作。\n\n而我目前最大的挑戰就是游泳，雖然曾經想過要放棄，卻還是想真正學會游泳，於是每週利用假日的時間上游泳課。從不敢下水、站到水裡就會很害怕，直到現在能用浮板漂浮踢水。每個人與生俱來的能力都不一樣，我會繼續努力，成為一個能為大家著想的 3Q 達人。"
-      },
-      {
-        "id": "EQ-604",
-        "class": "6年4班",
-        "name": "黃子馨",
-        "teacher": "周琬玲",
-        "reasons": [
-          "積極樂觀生活態度且能影響他人"
-        ],
-        "story": "一開始剛轉來青溪國小的時候，我總是很害羞、內向，因為還沒適應環境，加上那時候開始有游泳課，我非常害怕游泳，連最普通的自由式都不會，甚至換一次氣就游不下去，感到有些自卑。\n\n但我絕不放棄！經過老師不斷的鼓勵，以及五年級時透過看游泳漫畫自我揣摩技巧，下學期能下水後，我試著平衡身體、一步步練習划手，越游越順，不僅克服了自卑與恐懼，更培養出喜歡游泳的興趣。"
-      },
-      {
-        "id": "EQ-605",
-        "class": "6年5班",
-        "name": "陳玥彤",
-        "teacher": "鄒芬芳",
-        "reasons": [
-          "良好情緒管理能力",
-          "設身處地為人著想",
-          "溝通良好"
-        ],
-        "story": "我認為高 EQ 並不是一味地壓抑內心感受，而是能在面對壓力時，用理智的態度去面對。\n\n在日常校園中，當班級活動方案遭同學用犀利的言詞否定時，我內心雖然感到不滿，但我告訴自己要「對事不對人」，成功阻斷負面情緒，用平穩語調給予理性說明，讓大家和平達成共識。\n\n在「抗壓轉念」上，面對努力卻失常的打擊，我也從不怨天尤人，而是迅速調整心態，將失敗轉為成長的養分。"
-      },
-      {
-        "id": "EQ-606",
-        "class": "6年6班",
-        "name": "游翊芊",
-        "teacher": "徐慧萱",
-        "reasons": [
-          "良好情緒管理能力",
-          "設身處地為人著想"
-        ],
-        "story": "有一次在學校，我發現一位同學因為考試成績不理想而感到難過，甚至不想和其他人說話。看到他這樣，我沒有嘲笑他，而是先陪在他身邊聽他說出感受。我告訴他：「一次考試並不代表全部，只要知道自己哪裡不會，下次再努力就好。」並陪他一起討論錯題，後來他的心情慢慢好轉。\n\n這件事讓我學會不要只顧著表達自己，要站在對方的角度思考。有時候一句鼓勵的話或耐心的傾聽，就能給人力量。我也會提醒自己遇到不順心時先冷靜，保持體諒別人的心。"
-      },
-      {
-        "id": "EQ-607",
-        "class": "6年7班",
-        "name": "楊承錦",
-        "teacher": "陳榕烝",
-        "reasons": [
-          "良好情緒管理能力",
-          "設身處地為人著想",
-          "互助包容"
-        ],
-        "story": "在這次的暑假作業當中，當我遇到最不擅長的數獨和困難的成語謎題而感到非常挫折、想要放棄時，身為組長的李威霆同學非常有耐心且幽默地陪伴我、包容我。\n\n因為組員之間的互相包容與互補合作，加上大家的默契，讓我們這組拿到了全班最高積分！這次經歷讓我深刻體會到互助包容的力量與情緒支持的重要性。未來我也會發揮自己國語好的優勢主動幫助別人，成為一個懂得感恩且情緒成熟的 EQ 達人。"
-      },
-      {
-        "id": "EQ-608",
-        "class": "6年8班",
-        "name": "林詠晴",
-        "teacher": "林宜橙",
-        "reasons": [
-          "良好情緒管理能力激勵自己愈挫愈勇"
-        ],
-        "story": "五年級時我代表學校參加國語演說比賽，一次次的撰稿、修改與卡關，都慢慢成了讓我退縮的考驗，甚至開始懷疑自己。\n\n就在即將崩潰時，我想起了家人與老師的鼓勵，於是重新站起來，不斷練習與修正。雖然最後沒有獲獎，但在高壓培訓中我學會了自我調節情緒與豐富的演說寫作技巧。這次沒成功只是還未到終點，我依然保持樂觀的心態，勇敢面對未來的各種挑戰。"
-      },
-      {
-        "id": "EQ-609-1",
-        "class": "6年9班",
-        "name": "吳政翰",
-        "teacher": "張芯",
-        "reasons": [
-          "良好情緒管理能力",
-          "理性溝通化解衝突"
-        ],
-        "story": "我是一個不容易生氣的人，遇到不開心時通常會先讓自己冷靜，用理性的方式解決。\n\n有一次在安親班，我正忙著趕作業，一位同學卻一直在旁邊捉弄我。當下我其實有點生氣，但我知道直接發脾氣只會吵架，所以我先忍住情緒冷靜下來，然後認真告訴他：「我的作業還沒有寫完，可以先不要打擾我嗎？」他聽完後真的就停手了。\n\n這件事讓我體會到，生氣不能解決問題，冷靜下來把話說清楚，更容易讓對方理解。"
-      },
-      {
-        "id": "EQ-609-2",
-        "class": "6年9班",
-        "name": "劉宇謙",
-        "teacher": "張芯",
-        "reasons": [
-          "良好情緒管理能力",
-          "設身處地同理他人"
-        ],
-        "story": "以前的我比較容易衝動發脾氣，只要聽到不高興的話就會想跟人爭辯。後來發現生氣不僅不能解決問題，還會說出傷人的話傷害彼此關係。\n\n現在遇到不開心時，我會先冷靜下來尋求解決方法，也學會換位思考。當看到有同學被捉弄時，我會想到「如果是我一定很難過」，進而主動出面制止或陪伴安慰他。我發現 EQ 高不是不會生氣，而是懂得控制自己、體諒別人。"
-      },
-      {
-        "id": "EQ-609-3",
-        "class": "6年9班",
-        "name": "蕭惠敏",
-        "teacher": "張芯",
-        "reasons": [
-          "具積極樂觀生活態度且能影響別人"
-        ],
-        "story": "在生活中，我們難免會因為一時衝動而說出傷人的話。四年級大隊接力時，曾因組別選拔問題讓我火冒三丈，但冷靜下來後，我決定找對方好好談談，而不是繼續爭吵。\n\n經過那次事情後，我更明白練習 EQ 的重要性。當別人抱持不同意見或情緒激動時，我的第一步是「傾聽」而不是急著「反駁」。學著理解對方背後的原因，心中的不滿就會減少，取而代之的是理性溝通。我也多次運用這樣的方法化解同學誤會，成為大家公認值得信賴的心靈避風港。\n\n真正的高 EQ 不是永遠不生氣，而是在生氣時仍懂得傾聽；不是沒有衝突，而是懂得用理性面對衝突。"
-      }
-    ],
-    "MQ": [
-      {
-        "id": "MQ-601",
-        "class": "6年1班",
-        "name": "馮苙宬",
-        "teacher": "童奕儒",
-        "reasons": [
-          "尊重寬恕品德",
-          "忠心誠實品德",
-          "負責合作精神"
-        ],
-        "story": "這次我跟教練和隊友一起去中國南平市打棒球，出發前，教練常常跟我們說，到時候不只要練好打擊跟接球，更要懂得尊重彼此。\n\n一開始我不太懂那是什麼意思，直到踏上南平的球場，我才真正明白教練要告訴我們的是什麼。在南平比賽的第一天，天氣很熱。輪到我打擊時，我用盡全力把球打上外野，一口氣衝上一壘，雖然我很開心，但教練說過尊重他人是最重要的一步。於是我向對方的投手點頭，也向一壘審行禮。比賽中，對方打出一支漂亮的安打，我在心裡為他鼓掌，因為尊重對手的努力，才是真正的運動家精神。\n\n這趟南平棒球之旅，我們雖然有贏有輸，但我學到了比贏更重要的事情——那就是做一個誠實、懂得尊重，而且會關心他人的好球員。"
-      },
-      {
-        "id": "MQ-602-1",
-        "class": "6年2班",
-        "name": "陳佑安",
-        "teacher": "藍婷",
-        "reasons": [
-          "禮貌體貼良好品德",
-          "負責合作精神"
-        ],
-        "story": "MQ 跟我們的生活有重大關係，像是我們會跟學校的師長打招呼，在火車上讓位子給需要的人等。\n\n我會主動幫助同學，跟同學合作完成事情等都算在 MQ 裡面，而且跟同學合作完成事情也比較簡單，能一同分工做好分內責任。"
-      },
-      {
-        "id": "MQ-602-2",
-        "class": "6年2班",
-        "name": "劉喬淩",
-        "teacher": "藍婷",
-        "reasons": [
-          "挫折復原力與道德實踐",
-          "誠實不屈不撓"
-        ],
-        "story": "最近三年，我對老師和同學們都很有禮貌與尊重。參加各項班級比賽時，我會和同學互相合作、彼此支持，不會因為輸了比賽就責怪別人，而是一起改進、進步。\n\n如果發現別人遺失的物品，我也會主動交給老師或拿到失物招領，不占為己有，做到忠心誠實。當同學遇到困難時，我會伸出援手，關心對方，給他鼓勵與安慰，幫對方一起解決問題。大家都應該學習良好的做人處事態度。以後我也會繼續保持誠實負責、尊重他人、樂於服務的態度，努力成為一位有愛心、有責任感、值得信任的學生。"
-      },
-      {
-        "id": "MQ-604",
-        "class": "6年4班",
-        "name": "王苡橙",
-        "teacher": "周琬玲",
-        "reasons": [
-          "耐心面對手足相處",
-          "體諒包容他人"
-        ],
-        "story": "我有一個姊姊，一個妹妹，我就是那個夾在中間的「夾心餅乾」。我們幾乎每週都會吵架，每次吵的都差不多，像是誰先拿平板、誰先上鋼琴課等等。\n\n有一次我正在用平板查資料，查到一半時妹妹突然說要用平板寫數學作業，我跟她說要等我用完，然後她就哭了！我心想這個資料可以等一下再查，妹妹的聲帶哭壞了是無法修復的，於是我就把平板讓給了她。\n\n我以前並不是這樣，是因為爸爸給我看了一張距離地球60億公里外拍的照片，地球只是一個超級迷你的點點。我就想：我們就生活在這個小小藍點上，我一個人的小小不開心一點都不算甚麼。如果能照顧到別人的想法，就可以當一個超級MQ達人。"
-      },
-      {
-        "id": "MQ-605",
-        "class": "6年5班",
-        "name": "楊溢",
-        "teacher": "鄒芬芳",
-        "reasons": [
-          "禮貌體貼良好品德",
-          "尊重寬恕品德",
-          "負責合作精神"
-        ],
-        "story": "我覺得我最接近 MQ 達人，因為媽媽、外婆和師長同學都常常稱讚我很有禮貌。\n\n我具體的優良事蹟有：\n1. 遇到長輩有禮貌地打招呼並主動關懷。\n2. 將長輩與老師交代的事情做好，認真負責不推託。\n3. 團體中能積極參與活動並跟同儕保持良好合作。\n4. 遵守老師給的規定，做到尊重師長、友愛同學。\n5. 當別人在講話時能尊重他人，耐心聽對方說完再表達意見。"
-      },
-      {
-        "id": "MQ-606",
-        "class": "6年6班",
-        "name": "李崇瑜",
-        "teacher": "徐慧萱",
-        "reasons": [
-          "禮貌體貼良好品德",
-          "尊重寬恕品德",
-          "熱心助人"
-        ],
-        "story": "日常生活中，我始終秉持著同理心與熱心助人的精神。每當看到他人遇到困難時，我都會主動伸出援手。\n\n就像去年暑假時，我朋友不小心將組裝七七四十九天的積木弄垮了，他的情緒非常沮喪，我立刻上前安慰他，並耐心地陪他重新對照圖紙，一步一步把積木修復成原狀，讓他重新展現笑容。\n\n此外，在下課時間的走廊上，曾有同學因為奔跑而重重跌倒。我第一時間扶他起來，並關心他是否受傷，並陪他到一樓的健康中心擦藥。這些經歷讓我體會到體貼、關懷可以給他人帶來溫暖。"
-      },
-      {
-        "id": "MQ-607",
-        "class": "6年7班",
-        "name": "曾華鎧",
-        "teacher": "陳榕烝",
-        "reasons": [
-          "禮貌體貼品德",
-          "忠心誠實守規矩",
-          "負責合作勇於擔當"
-        ],
-        "story": "我是一個是非分明的人。在遊戲或考試時，堅持遵守規則、絕不作弊；看到不公平的事，也會勇敢站出來維護公道，或是請老師幫忙解決問題。對於自己分內的事(如午餐長等)會盡力完成，不敷衍了事。\n\n有一次自然課做分組報告，組內進度落後，大家都很緊張，但我主動承擔起分內工作，甚至幫忙協調大家的任務，最後順利完成了報告。這件事讓我明白，認真負責是對團體的承諾。\n\n還有一次學校體育競賽處於下風時，我冷靜思考戰術，在隊友協助下逆轉獲勝。無論是玩遊戲還是考試，我都堅持靠實力、不走捷徑。"
-      },
-      {
-        "id": "MQ-608",
-        "class": "6年8班",
-        "name": "李品妍",
-        "teacher": "林宜橙",
-        "reasons": [
-          "耐心面對生活挫折與人際摩擦",
-          "同理轉念"
-        ],
-        "story": "我有一個獨特的小興趣——手作史萊姆。調製時成型水必須「少量多次」地加入，邊加邊快速揉捏，給予膠體足夠的交聯反應時間，才能揉出完美質地。這段過程意外成為我學習品德與情緒管理的一堂課。\n\n回想以前的自己，脾氣其實有點急躁，遇到不順心或分組意見不合常像硬史萊姆一樣選擇「硬碰硬」。直到在揉捏史萊姆時突然體悟：當怒火或焦慮湧上心頭時，若只憑本能衝動反應，只會讓事情瞬間僵化；但如果能給自己一點緩衝時間，滴入像「甘油」般的冷靜與轉念，把情緒收斂起來好好說話，衝突往往就能迎刃而解。\n\n現在的我不再輕易抓狂，在朋友眼中成了一個好溝通、有耐心的夥伴，保持著柔軟包容的心態。"
-      },
-      {
-        "id": "MQ-609",
-        "class": "6年9班",
-        "name": "林士堯",
-        "teacher": "張芯",
-        "reasons": [
-          "禮貌體貼品德修養",
-          "尊重寬恕品德",
-          "負責合作良好品德"
-        ],
-        "story": "我覺得自己的情緒管理能力不錯，也是一個有禮貌的人。當別人和我玩鬧讓我覺得生氣時，我會提醒自己先冷靜下來，不要隨意發脾氣。\n\n除了管理自己的情緒，我也會關心身邊的人。如果同學受傷或感到不舒服，我會主動關心他，必要時陪他到健康中心，而不是只站在旁邊看熱鬧。當別人難過時，我也願意陪伴他、聽他說話。\n\n在與同學相處時，我認為尊重也很重要。即使別人的想法和我不同，我也會先聽完他的意見再表達看法，不隨意爭吵。分組活動時，我也願意和同學分工合作，一起把事情完成。"
-      }
-    ]
-  }
-}</script>
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>青溪國小 3Q達人線上評選系統</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #2563eb;
+      --primary-dark: #1d4ed8;
+      --primary-light: #eff6ff;
+      --success: #16a34a;
+      --success-light: #dcfce7;
+      --bg: #f8fafc;
+      --card: #ffffff;
+      --text-main: #0f172a;
+      --text-muted: #64748b;
+      --border: #cbd5e1;
+      --focus-ring: rgba(37, 99, 235, 0.2);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+    body {
+      font-family: 'Noto Sans TC', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background-color: var(--bg);
+      color: var(--text-main);
+      padding: 16px 12px;
+      line-height: 1.7;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .container { max-width: 680px; margin: 0 auto; padding-bottom: 120px; }
+
+    /* 頂部標題區 */
+    header {
+      background: var(--card);
+      padding: 22px 18px;
+      border-radius: 18px;
+      margin-bottom: 16px;
+      border: 1px solid var(--border);
+      box-shadow: 0 4px 8px -2px rgba(0,0,0,0.04);
+    }
+    .badge-sub {
+      display: inline-block;
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--primary);
+      background: var(--primary-light);
+      padding: 4px 10px;
+      border-radius: 8px;
+      margin-bottom: 8px;
+    }
+    h1 { font-size: 1.55rem; font-weight: 800; color: #0f172a; letter-spacing: -0.5px; }
+    .desc { font-size: 0.95rem; color: var(--text-muted); margin-top: 6px; }
+
+    /* 評審選單 */
+    .judge-wrapper {
+      margin-top: 16px;
+      padding-top: 16px;
+      border-top: 1.5px dashed var(--border);
+    }
+    .judge-label { font-size: 0.95rem; font-weight: 700; color: #334155; margin-bottom: 8px; display: block; }
+    .judge-select {
+      width: 100%;
+      height: 52px;
+      padding: 0 16px;
+      border: 2px solid var(--border);
+      border-radius: 12px;
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--text-main);
+      background: #fff;
+      outline: none;
+      transition: all 0.2s;
+    }
+    .judge-select:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 4px var(--focus-ring);
+    }
+
+    /* 類別切換標籤 */
+    .tabs-bar {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 18px;
+      position: sticky;
+      top: 8px;
+      z-index: 50;
+      background: var(--bg);
+      padding: 6px 0;
+    }
+    .tab-btn {
+      flex: 1;
+      height: 48px;
+      border: 1.5px solid var(--border);
+      background: #ffffff;
+      border-radius: 14px;
+      cursor: pointer;
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+    }
+    .tab-btn.active {
+      background: var(--primary);
+      color: #fff;
+      border-color: var(--primary);
+      box-shadow: 0 4px 10px rgba(37, 99, 235, 0.3);
+    }
+    .tab-btn.is-saved {
+      border-color: var(--success);
+      color: var(--success);
+    }
+    .tab-btn.active.is-saved {
+      background: var(--success);
+      color: #fff;
+      border-color: var(--success);
+    }
+
+    /* 學生候選卡片 */
+    .card {
+      background: var(--card);
+      border-radius: 18px;
+      padding: 20px 18px;
+      margin-bottom: 18px;
+      border: 1.5px solid var(--border);
+      box-shadow: 0 3px 6px rgba(0,0,0,0.02);
+    }
+    .card:focus-within {
+      border-color: var(--primary);
+    }
+    .card-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+    .stu-title { font-size: 1.35rem; font-weight: 800; color: #0f172a; }
+    .stu-class {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--primary);
+      background: var(--primary-light);
+      padding: 4px 10px;
+      border-radius: 8px;
+      margin-left: 8px;
+    }
+    .stu-teacher { font-size: 0.9rem; color: var(--text-muted); font-weight: 500; }
+
+    .tag-group { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; }
+    .tag-item {
+      font-size: 0.82rem;
+      padding: 4px 10px;
+      border-radius: 8px;
+      background: #f1f5f9;
+      color: #334155;
+      border: 1px solid #cbd5e1;
+      font-weight: 600;
+    }
+
+    /* 事蹟文字放大與排版 */
+    .story-content {
+      font-size: 1.08rem;
+      color: #1e293b;
+      background: #f8fafc;
+      padding: 16px;
+      border-radius: 14px;
+      white-space: pre-wrap;
+      line-height: 1.85;
+      margin-bottom: 16px;
+      border: 1px solid #e2e8f0;
+      letter-spacing: 0.2px;
+    }
+
+    /* 給分區塊 */
+    .score-box {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #f1f5f9;
+      padding: 14px 16px;
+      border-radius: 14px;
+    }
+    .score-title { font-size: 1.05rem; font-weight: 700; color: #1e293b; }
+    .input-score {
+      width: 110px;
+      height: 52px;
+      border: 2px solid var(--border);
+      border-radius: 12px;
+      font-size: 1.4rem;
+      font-weight: 800;
+      text-align: center;
+      color: var(--primary);
+      background: #fff;
+      outline: none;
+      transition: all 0.2s;
+    }
+    .input-score:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 4px var(--focus-ring);
+    }
+
+    /* 底部浮動操作欄 */
+    .bottom-bar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: rgba(255, 255, 255, 0.98);
+      backdrop-filter: blur(10px);
+      border-top: 1px solid var(--border);
+      padding: 14px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 -6px 16px rgba(0,0,0,0.06);
+      z-index: 100;
+    }
+    .progress-text { font-size: 1.05rem; font-weight: 800; color: #0f172a; }
+    .progress-sub { font-size: 0.8rem; color: var(--text-muted); font-weight: 500; }
+
+    .btn-submit {
+      background: var(--primary);
+      color: #fff;
+      border: none;
+      height: 52px;
+      padding: 0 24px;
+      border-radius: 12px;
+      font-size: 1.05rem;
+      font-weight: 800;
+      cursor: pointer;
+      box-shadow: 0 3px 6px rgba(37, 99, 235, 0.25);
+      transition: all 0.2s;
+    }
+    .btn-submit:disabled {
+      background: #cbd5e1;
+      color: #64748b;
+      cursor: not-allowed;
+      box-shadow: none;
+    }
+    .btn-submit.saved-btn {
+      background: var(--success);
+      box-shadow: 0 3px 6px rgba(22, 163, 74, 0.25);
+    }
+
+    .toast-banner {
+      background: var(--success-light);
+      color: #166534;
+      border: 1.5px solid #86efac;
+      padding: 14px;
+      border-radius: 14px;
+      font-weight: 700;
+      text-align: center;
+      margin-bottom: 16px;
+      display: none;
+      font-size: 1rem;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <div id="allFinishedBanner" class="toast-banner">
+    🎉 恭喜！您已全數完成 AQ、MQ、EQ 三個類別的評分儲存。
+  </div>
+
+  <header>
+    <div class="badge-sub">青溪國小 · 六年級評審專用</div>
+    <h1>3Q達人故事評選系統</h1>
+    <div class="desc">請先選擇委員姓名，詳閱故事後給予 0~100 評分。</div>
+
+    <div class="judge-wrapper">
+      <label class="judge-label" for="judgeSelect">請選擇您的評審姓名：</label>
+      <select id="judgeSelect" class="judge-select" onchange="handleJudgeChange()">
+        <option value="">-- 請點此選擇姓名 --</option>
+        <option value="詹世羽 老師">詹世羽 老師</option>
+        <option value="游智媚 老師">游智媚 老師</option>
+        <option value="李嘉傑 老師">李嘉傑 老師</option>
+        <option value="陳玟婷 老師">陳玟婷 老師</option>
+        <option value="陳佩欣 老師">陳佩欣 老師</option>
+        <option value="李偉甄 老師">李偉甄 老師</option>
+        <option value="教務主任">教務主任</option>
+        <option value="學務主任">學務主任</option>
+        <option value="總務主任">總務主任</option>
+        <option value="輔導主任">輔導主任</option>
+      </select>
+    </div>
+  </header>
+
+  <div class="tabs-bar">
+    <button class="tab-btn active" id="tab-AQ" onclick="switchCategory('AQ')">AQ</button>
+    <button class="tab-btn" id="tab-MQ" onclick="switchCategory('MQ')">MQ</button>
+    <button class="tab-btn" id="tab-EQ" onclick="switchCategory('EQ')">EQ</button>
+  </div>
+
+  <div id="cardsList"></div>
+</div>
+
+<div class="bottom-bar">
+  <div>
+    <div id="catProgressText" class="progress-text">AQ 進度：0 / 12</div>
+    <div class="progress-sub">手機端自動即時儲存</div>
+  </div>
+  <button id="submitCatBtn" class="btn-submit" onclick="submitCurrentCategory()" disabled>儲存 AQ 評分</button>
+</div>
+
 <script>
-'use strict';
-const CONFIG=JSON.parse(document.getElementById('app-data').textContent);
-const judgesList=CONFIG.judgesList,candidatesData=CONFIG.candidatesData;
-const cats=['AQ','MQ','EQ'],titles={AQ:'AQ 逆境智商',MQ:'MQ 道德智商',EQ:'EQ 情緒智商'};
-const $=id=>document.getElementById(id),clone=x=>JSON.parse(JSON.stringify(x));
-let judge='',category='AQ',draft=null,cloud=null,loaded=false,busy=false,sequence=0,conflicts={};
-const key=j=>'qingxi-3q:'+CONFIG.eventId+':'+j;
-const blank=()=>Object.fromEntries(cats.map(c=>[c,{scores:{},baseVersion:'',dirty:false,requestId:''}]));
-function message(text,error=false){$('message').textContent=text;$('message').classList.toggle('error',error);}
-function read(j){try{const v=JSON.parse(localStorage.getItem(key(j)));if(!v)return blank();const out=blank();cats.forEach(c=>{if(v[c]&&typeof v[c].scores==='object'&&v[c].scores){out[c]={...out[c],...v[c]};}});return out;}catch{return blank();}}
-function persist(){if(!judge||!draft)return;try{localStorage.setItem(key(judge),JSON.stringify(draft));$('storageError').classList.add('hidden');}catch{$('storageError').classList.remove('hidden');}}
-function valid(v){return v!==''&&v!==null&&v!==undefined&&Number.isFinite(Number(v))&&Number(v)>=0&&Number(v)<=100;}
-function count(c){return candidatesData[c].filter(s=>draft&&valid(draft[c].scores[s.id])).length;}
-function same(a,b){return Object.keys(a).length===Object.keys(b).length&&Object.keys(a).every(k=>String(a[k])===String(b[k]));}
-function rpc(name,arg){return new Promise((resolve,reject)=>{if(!window.google?.script?.run){reject(Error('此檔尚未連接雲端，請使用部署後的評選網址。'));return;}const timer=setTimeout(()=>reject(Error('連線逾時，請重新同步或重試')),45000);google.script.run.withSuccessHandler(v=>{clearTimeout(timer);resolve(v);}).withFailureHandler(e=>{clearTimeout(timer);reject(e);})[name](arg);});}
-function update(){
- document.querySelectorAll('.tab').forEach(b=>{const c=b.dataset.cat;b.classList.toggle('active',c===category);b.setAttribute('aria-selected',String(c===category));b.disabled=busy;b.querySelector('small').textContent=draft?(conflicts[c]?'版本待確認':draft[c].dirty?'有未送出修改':cloud?.savedStatus[c]?'✓ 已儲存':`${count(c)} / ${candidatesData[c].length}`):`${candidatesData[c].length}位候選人`;});
- const n=count(category),total=candidatesData[category].length;
- $('progress').textContent=judge?`${category} 已填 ${n} / ${total} 人`:'請先選擇評審姓名';
- document.querySelector('.bar span').style.width=(n/total*100)+'%';document.querySelector('.bar').setAttribute('aria-valuenow',Math.round(n/total*100));
- $('judge').disabled=busy;$('sync').disabled=!judge||busy;
- $('save').disabled=!judge||!loaded||busy||!cloud?.open||Boolean(conflicts[category])||n!==total;
- $('save').textContent=busy?'處理中…':'儲存此類別';
- $('saveInfo').textContent=!judge?'請先選擇姓名':busy?'請稍候，您的草稿仍保留':!loaded?'尚未完成雲端同步':!cloud.open?'目前停止收件':draft[category].dirty?'本機草稿尚未送出':cloud.savedStatus[category]?`✓ 已儲存 ${cloud.times?.[category]||''}`:'輸入即暫存於這部裝置';
- $('conflict').classList.toggle('hidden',!conflicts[category]);
- document.querySelectorAll('.score input').forEach(el=>el.disabled=!judge||busy);
- $('useCloud').disabled=$('keepLocal').disabled=busy;
-}
-function render(){
- $('heading').textContent=titles[category];$('candidates').replaceChildren();
- candidatesData[category].forEach((s,i)=>{
-  const article=document.createElement('article');article.className='student';
-  // All candidate strings go through textContent, never HTML interpolation.
-  article.innerHTML='<div class="student-head"><div><div class="index"></div><h3></h3></div><div class="muted teacher"></div></div><div class="tags"></div><p class="story"></p><div class="score"><label>委員評分<small>請輸入0～100分</small></label><div><input type="number" min="0" max="100" step="any" inputmode="decimal" autocomplete="off"> 分</div></div>';
-  article.querySelector('.index').textContent=String(i+1).padStart(2,'0')+' / '+s.class;
-  article.querySelector('h3').textContent=s.name;article.querySelector('.teacher').textContent='推薦師長：'+s.teacher;
-  s.reasons.forEach(reason=>{const tag=document.createElement('span');tag.className='tag';tag.textContent=reason;article.querySelector('.tags').append(tag);});
-  article.querySelector('.story').textContent=s.story;
-  const input=article.querySelector('input');input.id='score-'+s.id;article.querySelector('label').htmlFor=input.id;
-  input.value=draft?.[category].scores[s.id]??'';
-  input.addEventListener('input',()=>{draft[category].scores[s.id]=input.value;draft[category].dirty=true;draft[category].requestId='';persist();update();});
-  $('candidates').append(article);
- });update();
-}
-async function sync(){
- if(!judge||busy)return;const token=++sequence,selected=judge;busy=true;loaded=false;update();message('正在讀取您的雲端進度…');
- try{
-  const result=await rpc('getJudgeStatus',selected);if(token!==sequence||selected!==judge)return;
-  if(result.eventId!==CONFIG.eventId)throw Error('活動版本已更新，請重新整理');cloud=result;conflicts={};
-  cats.forEach(c=>{
-   const local=draft[c],remote=result.scores[c],version=result.versions[c];
-   if(local.dirty){
-    if(same(local.scores,remote)){draft[c]={scores:remote,baseVersion:version,dirty:false,requestId:''};}
-    else if(local.baseVersion!==version)conflicts[c]=true;
-   }else draft[c]={scores:remote,baseVersion:version,dirty:false,requestId:''};
-  });loaded=true;persist();message(result.open?'雲端同步完成，本機未送出修改會保留。':'目前停止收件，可查看已存分數；本機修改仍會保留。');
- }catch(e){message('同步失敗：'+(e.message||e)+' 您仍可填寫本機草稿，連線後按重新同步。',true);}
- finally{if(token===sequence){busy=false;render();}}
-}
-async function save(){
- if($('save').disabled)return;const c=category,j=judge;
- const d=draft[c];if(!d.requestId)d.requestId=crypto.randomUUID?crypto.randomUUID():Date.now()+'-'+Math.random().toString(36).slice(2);
- persist();busy=true;update();message('正在儲存 '+c+'…');
- try{
-  const result=await rpc('saveCategoryScores',{judge:j,category:c,eventId:CONFIG.eventId,baseVersion:d.baseVersion,requestId:d.requestId,records:candidatesData[c].map(s=>({id:s.id,score:Number(d.scores[s.id])}))});
-  if(!result.success){if(result.code==='CONFLICT')loaded=false;throw Error(result.message);}
-  d.dirty=false;d.baseVersion=result.version;d.requestId='';cloud.savedStatus[c]=true;cloud.scores[c]=clone(d.scores);cloud.versions[c]=result.version;cloud.times[c]=result.time;persist();message(result.warning||c+' 已成功儲存；您可以繼續其他類別。');
- }catch(e){message('未確認儲存成功：'+(e.message||e)+' 草稿已保留，請重試或重新同步。',true);}
- finally{busy=false;update();}
-}
-judgesList.forEach(j=>{const o=document.createElement('option');o.value=o.textContent=j;$('judge').append(o);});
-cats.forEach(c=>{const b=document.createElement('button');b.className='tab';b.dataset.cat=c;b.setAttribute('role','tab');b.append(document.createTextNode(titles[c]));b.append(document.createElement('small'));b.onclick=()=>{if(!busy){category=c;render();}};document.querySelector('.tabs').append(b);});
-$('judge').onchange=()=>{sequence++;judge=$('judge').value;draft=judge?read(judge):null;cloud=null;loaded=false;conflicts={};render();if(judge)sync();else message('');};
-$('sync').onclick=sync;$('save').onclick=save;
-$('useCloud').onclick=()=>{draft[category]={scores:clone(cloud.scores[category]),baseVersion:cloud.versions[category],dirty:false,requestId:''};delete conflicts[category];persist();render();message('已使用此類別的雲端版本。');};
-$('keepLocal').onclick=()=>{draft[category].baseVersion=cloud.versions[category];draft[category].requestId='';delete conflicts[category];persist();render();message('已保留本機草稿，請檢查後儲存此類別。');};
-$('backup').onclick=()=>{if(!judge){message('請先選擇姓名。',true);return;}const url=URL.createObjectURL(new Blob([JSON.stringify({eventId:CONFIG.eventId,judge,draft},null,2)],{type:'application/json'}));const a=document.createElement('a');a.href=url;a.download='3Q草稿_'+judge+'.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);};
-window.addEventListener('storage',e=>{if(judge&&e.key===key(judge)){message('同一裝置的另一分頁更動了草稿；目前畫面保持原狀，請先匯出備份再重新載入。',true);}});
-window.addEventListener('beforeunload',e=>{if(busy||draft&&cats.some(c=>draft[c].dirty)){e.preventDefault();e.returnValue='';}});
-if(!window.google?.script?.run){$('mode').classList.remove('hidden');$('mode').textContent='本機預覽：可閱讀事蹟並保留草稿，尚未連接Google試算表。正式儲存請使用部署網址。';}
-render();
-</script></body></html>
+  // Google Apps Script 正式部署 API 網址
+  const GAS_API_URL = "https://script.google.com/macros/s/AKfycbx6lB28alyWpZ-B8HUIPr0YkqZmKdQaiel0dNSQTRD_byvk0DaxP_sW33k74Gfa8oaoeA/exec";
+
+  const candidatesData = {
+    AQ: [
+      { id: "AQ-601", class: "6年1班", name: "張立欣", teacher: "童奕儒", reasons: ["良好挫折復原力", "積極樂觀面對挑戰", "不屈不撓表現卓越"], story: "我喜歡的運動非常多，圍棋也包括在內。記得半年前剛升上二段的我還弱弱的，所以在棋院下棋都常常輸，去比賽也只獲得一兩勝而已，所以當時的我對於自己的實力越來越沒有信心。\n\n直到有一次，我在下棋時突然發現了一個問題，我的死活(圍棋用語)太差了，很容易就被對方殺死。所以我開始去向老師與同學學習，觀察其他人在下棋時如何克服同樣的難題。在一番努力後，終於開始逆轉，我開始能在和其他人對戰時獲勝。獲勝後我既開心又覺得內心鬆了一口氣，心想：「皇天不負苦心人啊！」\n\n最近我又改善了許多弱點，讓實力提升了不少，現在也慢慢地可以打敗其他人了。再過不久我即將要去參加比賽，希望我可以五戰全勝，升上三段！" },
+      { id: "AQ-602", class: "6年2班", name: "楊依芃", teacher: "藍婷", reasons: ["良好挫折復原力", "積極樂觀面對挑戰", "不屈不撓表現卓越"], story: "我其實從以前就一直非常討厭游泳，每次面對那可怕的泳池和換氣的挑戰時，我每次都害怕到心跳超快！甚至真的想立刻消失在那！而且我們的游泳課大部分都是在冷到快要變成冷凍蔬菜的冬天上的，然後每次從水裡上來都冷到快感冒，所以我才會這麼的討厭游泳課。\n\n可是！不管在游泳池裡有多害怕、多討厭，我都沒有想說要放棄，反而我還會先叫自己冷靜下來，並再去挑戰那些我曾經出錯過的動作，一邊看著老師耐心教我、一邊在仔細想想最有效的解決方法，我就輕鬆，然後在旁邊一次次的練習老師剛才教的東西，終於！我在那一次居然就學會了！當下我真的覺得我的努力都值得了！" },
+      { id: "AQ-603", class: "6年3班", name: "陳妍菱", teacher: "梅宸葳", reasons: ["良好挫折復原力", "積極樂觀面對挑戰", "不屈不撓表現卓越"], story: "4年級時，我看到同學在用鉤針織東西，那時我在旁邊看得很有興趣。五年級創資班自學課，老師說每個人要選一個主題進行自學研究，我當然毫不猶豫選擇毛線鉤針編織。\n\n一開始在編織的時候，我還沒有掌握編織的技巧，因此我常常搞錯編織的順序，因而編得亂七八糟，只好不斷地拆線繼續編織。因為我想要快一點完成預計的作品，所以後來我就在家裡使用筆電查針法與預習下次的進度，透過這樣過程讓自己不斷精進編織技術。\n\n而當我正式在編織時，倘若遇到不會的針法或忘記要怎麼編時，我就會借學校（創資）的電腦再複習幾次。如果我同一個步驟忘記太多次因而必須頻繁地查閱電腦時，我就會利用編織專門的符號畫圖記錄，這樣下次就不用一直開電腦。如果在編織的過程時發現有錯，但是我編到的地方距離我編錯的地方有點遠，我還是照樣把線拉掉，到我編錯的地方重新編織好。" },
+      { id: "AQ-604-1", class: "6年4班", name: "李珮朮", teacher: "周琬玲", reasons: ["積極樂觀面對挑戰"], story: "三、四年級時，我參加了學校舉辦的「領袖營」。其中一次活動，是挑戰爬草嶺古道。\n\n我們從山腳一路往上爬，原本是涼爽舒適的陰天，沒想到爬到半山腰時，天空突然下起了大雨！山上的氣溫也驟降到只有9度。雖然我戴著手套和帽子，雙手和臉還是被凍得紅通通的。更糟的是，雨水滲進手套裡，讓我的雙手冷得幾乎失去知覺。我們已經爬了一半，只能硬著頭皮繼續前進。\n\n途中有地方可以休息、吃東西和上廁所，我趕緊拿出食物充飢。休息過後，我們繼續往山頂前進。因為下過雨，石階又濕又滑，每一步都要非常小心，幸好有登山杖的幫助。一路上，我們經歷了寒冷、大雨和濕滑的石階等重重困難，但大家互相鼓勵，沒有放棄。最後，我們終於成功登頂！就在我們抵達山頂時，天空也放晴了，陽光彷彿在為我們的堅持與成功歡呼。這次經驗讓我明白，只要堅持到底，再困難的事情也能成功。" },
+      { id: "AQ-604-2", class: "6年4班", name: "陳可旭", teacher: "周琬玲", reasons: ["積極樂觀面對挑戰"], story: "我是一個常常使用電腦寫程式的學生。有時候在設計遊戲時，可能會遇到角色移動、控制、函數整合等問題，常常需要花費大量的時間，重新一步一步觀察程式，找出裡面隱藏的「蟲子（Bug）」，並想辦法把它們消除，但我從不輕易放棄，因為做出有趣的遊戲，讓人收藏是一件非常有成就感的事情。\n\n今年一月時，學校舉辦攀登高山的活動，從嘉義平地搭車上升至2845公尺的鹿林山，由於上坡路段較多，路況崎嶇，再加上寒風和高山低溫，讓人感到十分不舒服。沿路高山森林的自然景色不斷變化，天空還下起了冰霰，那是我第一次看到類似冰雹和雪的景象！登高山空氣稀薄，走起路來更像是有重重的石頭壓在腳上…但我一想到晚上可以吃到美味的烤肉大餐，還能躺在溫暖的床鋪上休息，於是咬牙堅持，最後順利抵達終點，也蒐集到了我人生的第一座台灣百嶽。\n\n我覺得，不管做什麼事情，面對挫折的能力都非常重要，有時候不能因為一點點困難就選擇放棄，有時跳脫舒適圈，才能有更有趣的收穫！" },
+      { id: "AQ-605", class: "6年5班", name: "黃少騏", teacher: "鄒芬芳", reasons: ["良好挫折復原力", "不屈不撓表現卓越"], story: "【獲獎經歷】\n1. 114學年度全國學生音樂比賽弦樂合奏國小組優等\n2. 114學年度(桃園)市內初賽奪下特優\n3. 113學年度(2024-2025)弦樂合奏國小組「特優第一名」\n\n一開始小學上C團的時候，我覺得小提琴很難，那時候連拉完一首曲子都沒辦法，我記得第一天上團課時，握弓的姿勢不知為什麼很醜，所幸在老師指導下終於會握了。第2堂課教小星星，拉得不是很順暢，經過教導終於可以拉完整首。升上B團曲子更難，需要花費更多時間練習；升上A團後又是完全不同層級，不是超級高音就是超級低音。\n\n接著大型比賽來了，不到3個月練習，比賽前老師還會考試，不會的人要在外面對著柱子拉500遍練習到手長繭，但我都沒有放棄繼續完成它。終於皇天不負苦心人，在比賽前我順利的拉好曲子。比賽當天我告訴自己「我一定可以做到」，最後在弦樂團全部人的努力下拿下第一名。" },
+      { id: "AQ-606", class: "6年6班", name: "劉芷齊", teacher: "徐慧萱", reasons: ["良好挫折復原力", "積極樂觀面對挑戰", "不屈不撓表現卓越"], story: "我覺得我是AQ逆境智商達人，因為在遇到困難時，我總是能展現良好的挫折容忍力。每一周星期六，我都要考試和上課，有時候考得很好，會讓媽媽很高興，但如果考不好時，媽媽就會說：「你的分數可不可以不要像遊樂園裡的雲霄飛車一樣，有時高而有時低可不可以？」。\n\n但是，在我心中，我一點也不在意，因為我覺得這一次沒有考好，下一次再努力就好，所以我一點都不在意我媽媽罵了我什麼，因為睡一覺起來就忘了我媽昨天晚上罵我什麼了。\n\n此外，我也願意接受挑戰，雖然桌遊上的盒子上寫說十二歲以上才可以玩，但我還是想挑戰看看，於是就拉著爸爸的手，叫他一起陪我組積木，沒想到最後還能順利完成任務，因為這次的經驗，讓我知道凡事遇到困難或是在逆境中，不要隨意幫自己設限，對自己多一點信心，可以多多嘗試，就能挖掘自己的潛力，這也是AQ達人的精神。" },
+      { id: "AQ-607", class: "6年7班", name: "徐至謙", teacher: "陳榕烝", reasons: ["良好挫折復原力", "不屈不撓表現卓越"], story: "自從四年級暑假開始，我進入了一間名為「興儒」的補習班。那裡每個星期六都會進行嚴格的考試與排名，對當時的我來說，週週揭曉的競爭舞台就像人間地獄般，充滿了巨大的壓力和折磨。\n\n雖然在高手雲集的環境中維持頂尖非常疲累，但我從未選擇逃避，而是告訴自己要保持樂觀的心態。我試著轉換思考方向、積極「往外看」，不把排名當作患得患失的包袱，而是將它視為不斷突破自我的動力。\n\n這種彈性的思維讓我面對高壓時依然能靜下心來，維持穩定的學習節奏。經過一次次的考驗，這段經歷長遠地影響了我。它讓我深刻體會到，高壓的逆境是鍛鍊心智最好的養分，只要維持正向想法，就能在競爭中愈挫愈勇，成為真正的逆境達人。" },
+      { id: "AQ-608", class: "6年8班", name: "林群展", teacher: "林宜橙", reasons: ["積極樂觀面對挑戰"], story: "在這個暑假，我爸為了讓我像哥哥一樣成績優秀，並考上私中，特別為我買了銜接國一的線上課程。課程內容極度困難，不管是國文還是數學，每一科都不放過。國文科古文、大考試題，數學進階練習、資優挑戰題，難到我燒破腦筋都想不出答案，即便如此，我不但毫無畏懼，反而更加興奮。\n\n解鎖我未發現的新知識，對我而言是非常有趣的事，當然也有難題讓我不斷陷入瓶頸，不過我不會因此一蹶不振，而是從哪跌倒就從哪站起，從不輕易氣餒。\n\n學數學我不單單只是一直死背公式，我會自己發揮創意，提出與老師迥然不同的想法，不會一味的把老師說的解法或重點抄在講義上，而自己的頭腦都不思考，過個幾天就忘的一乾二淨，我希望自己正向積極的學習態度可以一直不斷的持續，讓我不間斷的進步，達到心中所滿意的目標。" },
+      { id: "AQ-609", class: "6年9班", name: "蔡汯嶧", teacher: "張芯", reasons: ["積極樂觀面對挑戰"], story: "我是AQ達人，因為我遇到困難時，不會輕易放棄。像是老師交代的事情，或是遇到不會的數學題時，我都會先自己想辦法解決，直到真的想不出來，才會停下來尋求幫助。\n\n例如寫數學題時，如果遇到不會的題目，我會先仔細讀題，想想看可以用什麼方法解決。如果第一次算錯了，我不會馬上放棄，而是重新檢查算式，看看是哪一個步驟出了問題，再重新計算一次，直到找到正確的答案。\n\n如果試了很多次還是想不出來，我也不會因為害怕被笑而放棄，而是主動詢問同學或老師，請他們提醒我解題的方法。不過，我不會直接抄別人的答案，而是先聽懂解題的方法，再試著靠自己的力量完成。\n\n我覺得遇到困難時，最重要的就是不要輕易放棄。只要有耐心，多嘗試幾次，就有機會找到解決的方法。困難並不可怕，可怕的是還沒有努力，就先選擇放棄。只要願意堅持、勇敢面對，我相信自己一定能克服更多的挑戰。" },
+      { id: "AQ-610-1", class: "6年10班", name: "邱郁涵", teacher: "林湘妮", reasons: ["良好挫折復原力", "不屈不撓表現卓越"], story: "這個炎熱的暑假，我多學了一個在我心目中特別的樂器這就被叫作：「長號」，它也有別名叫做:「伸縮喇叭」，我為什麼會覺得它很特別的原因就是因為它只有一個按鍵其他的音都是靠感覺去拉，所以它非常的難，但是一開始我不知道它很難所以我就選了！\n\n每次分部課上完我們大家都會留下來繼續吹，但因為我少上了一次課，所以速度有一點落後，即使我被同學笑我也覺得沒有關係，我只希望我能趕快跟上進度，逃出逆境，往最好的方向和最適合我成功的那一條路，以上這些我認為我是個AQ小達人。" },
+      { id: "AQ-610-2", class: "6年10班", name: "鄭子睿", teacher: "林湘妮", reasons: ["積極樂觀面對挑戰", "不屈不撓表現卓越"], story: "二年級升三年級的第一次考試，全班都考不好，我甚至考了不及格，但是我沒有難過，而是在反省自己哪裡沒有做好。雖然二年級的期末考得分有很好，到了四年級成績有在慢慢變好，但我一樣沒有鬆懈，一樣繼續努力讀書，準備下一次的考試。\n\n五年級就是重新的時候了，我也馬上進入狀況，即使期中考考得不好我也沒有放棄，一直繼續努力讀書。五年級最後一次考試，我信心十足，考試考得非常順利，內心安穩。王老師還說有機會前二名，雖然只得到進步獎，但已經足夠了。" }
+    ],
+    EQ: [
+      { id: "EQ-601", class: "6年1班", name: "潘妍希", teacher: "童奕儒", reasons: ["良好情緒管理能力", "溝通能力良好", "樂觀能影響他人"], story: "比賽結果揭曉的那一刻，看著榜單上沒有自己的名字，心裡湧上難過和失落。眼淚在眼眶裡打轉，難過是難免的，畢竟這段日子以來的努力和汗水，誰都希望能換來閃亮的獎盃。\n\n但擦乾眼淚之後，這場比賽並沒有結束。我學著靜下來反省，回想過程中的每一個細節，找出可以做得更好的地方，這不是自我否定，而是讓自己變得更強大的養分。\n\n轉頭看見身邊同樣紅著眼眶的同伴，我收起自己的沮喪，拍拍他們的肩膀說：「沒關係，我們已經盡全力了，下次再一起加油吧！」\n\n原來比賽沒有得名並不可怕，比賽教會我們的是怎麼面對失敗和失落，透過反省學習謙卑。用同理心去擁抱彼此的淚水，這份溫柔和堅強，比任何獎牌都還要珍貴。" },
+      { id: "EQ-602", class: "6年2班", name: "陳佑安", teacher: "藍婷", reasons: ["良好情緒管理能力", "設身處地為人著想"], story: "EQ 是具有良好的情緒管理能力，能設身處地為別人著想，這是我們人人都要有的能力。\n\n不僅能體諒別人，別人也會想要跟你當朋友，就會有良好的人際關係。且能積極樂觀影響別人，使氣氛更加和諧，就可以改變團體氛圍，讓大家都能用樂觀的心態面對事情。換做是我的話，遇到挫折我也會先放鬆自己，再以良好心態去克服難關。" },
+      { id: "EQ-603", class: "6年3班", name: "施品妍", teacher: "梅宸葳", reasons: ["良好挫折復原力", "不屈不撓愈挫愈勇"], story: "EQ 是生活中很常聽見的名詞，也是現代生活中很重要的能力。有一次同學們一起合作畫畫，大家都很堅持自己的想法，雖然我也有自己不同的意見，但我選擇了傾聽同學們的想法，配合大家一起合力完成畫作。\n\n而我目前最大的挑戰就是游泳，雖然曾經想過要放棄，卻還是想真正學會游泳，於是每週利用假日的時間上游泳課。從不敢下水、站到水裡就會很害怕，直到現在能用浮板漂浮踢水。每個人與生俱來的能力都不一樣，我會繼續努力，成為一個能為大家著想的 3Q 達人。" },
+      { id: "EQ-604", class: "6年4班", name: "黃子馨", teacher: "周琬玲", reasons: ["積極樂觀生活態度且能影響他人"], story: "一開始剛轉來青溪國小的時候，我總是很害羞、內向， gas因為還沒適應環境，加上那時候開始有游泳課，我非常害怕游泳，連最普通的自由式都不會，甚至換一次氣就游不下去，感到有些自卑。\n\n但我絕不放棄！經過老師不斷的鼓勵，以及五年級時透過看游泳漫畫自我揣摩技巧，下學期能下水後，我試著平衡身體、一步步練習划手，越游越順，不僅克服了自卑與恐懼，更培養出喜歡游泳的興趣。" },
+      { id: "EQ-605", class: "6年5班", name: "陳玥彤", teacher: "鄒芬芳", reasons: ["良好情緒管理能力", "設身處地為人著想", "溝通良好"], story: "我認為高 EQ 並不是一味地壓抑內心感受，而是能在面對壓力時，用理智的態度去面對。\n\n在日常校園中，當班級活動方案遭同學用犀利的言詞否定時，我內心雖然感到不滿，但我告訴自己要「對事不對人」，成功阻斷負面情緒，用平穩語調給予理性說明，讓大家和平達成共識。\n\n在「抗壓轉念」上，面對努力卻失常的打擊，我也從不怨天尤人，而是迅速調整心態，將失敗轉為成長的養分。" },
+      { id: "EQ-606", class: "6年6班", name: "游翊芊", teacher: "徐慧萱", reasons: ["良好情緒管理能力", "設身處地為人著想"], story: "有一次在學校，我發現一位同學因為考試成績不理想而感到難過，甚至不想和其他人說話。看到他這樣，我沒有嘲笑他，而是先陪在他身邊聽他說出感受。我告訴他：「一次考試並不代表全部，只要知道自己哪裡不會，下次再努力就好。」並陪他一起討論錯題，後來他的心情慢慢好轉。\n\n這件事讓我學會不要只顧著表達自己，要站在對方的角度思考。有時候一句鼓勵的話或耐心的傾聽，就能給人力量。我也會提醒自己遇到不順心時先冷靜，保持體諒別人的心。" },
+      { id: "EQ-607", class: "6年7班", name: "楊承錦", teacher: "陳榕烝", reasons: ["良好情緒管理能力", "設身處地為人著想", "互助包容"], story: "在這次的暑假作業當中，當我遇到最不擅長的數獨和困難的成語謎題而感到非常挫折、想要放棄時，身為組長的李威霆同學非常有耐心且幽默地陪伴我、包容我。\n\n因為組員之間的互相包容與互補合作，加上大家的默契，讓我們這組拿到了全班最高積分！這次經歷讓我深刻體會到互助包容的力量與情緒支持的重要性。未來我也會發揮自己國語好的優勢主動幫助別人，成為一個懂得感恩且情緒成熟的 EQ 達人。" },
+      { id: "EQ-608", class: "6年8班", name: "林詠晴", teacher: "林宜橙", reasons: ["良好情緒管理能力激勵自己愈挫愈勇"], story: "五年級時我代表學校參加國語演說比賽，一次次的撰稿、修改與卡關，都慢慢成了讓我退縮的考驗，甚至開始懷疑自己。\n\n就在即將崩潰時，我想起了家人與老師的鼓勵，於是重新站起來，不斷練習與修正。雖然最後沒有獲獎，但在高壓培訓中我學會了自我調節情緒與豐富的演說寫作技巧。這次沒成功只是還未到終點，我依然保持樂觀的心態，勇敢面對未來的各種挑戰。" },
+      { id: "EQ-609-1", class: "6年9班", name: "吳政翰", teacher: "張芯", reasons: ["良好情緒管理能力", "理性溝通化解衝突"], story: "我是一個不容易生氣的人，遇到不開心時通常會先讓自己冷靜，用理性的方式解決。\n\n有一次在安親班，我正忙著趕作業，一位同學卻一直在旁邊捉弄我。當下我其實有點生氣，但我知道直接發脾氣只會吵架，所以我先忍住情緒冷靜下來，然後認真告訴他：「我的作業還沒有寫完，可以先不要打擾我嗎？」他聽完後真的就停手了。\n\n這件事讓我體會到，生氣不能解決問題，冷靜下來把話說清楚，更容易讓對方理解。" },
+      { id: "EQ-609-2", class: "6年9班", name: "劉宇謙", teacher: "張芯", reasons: ["良好情緒管理能力", "設身處地同理他人"], story: "以前的我比較容易衝動發脾氣，只要聽到不高興的話就會想跟人爭辯。後來發現生氣不僅不能解決問題，還會說出傷人的話傷害彼此關係。\n\n現在遇到不開心時，我會先冷靜下來尋求解決方法，也學會換位思考。當看到有同學被捉弄時，我會想到「如果是我一定很難過」，進而主動出面制止或陪伴安慰他。我發現 EQ 高不是不會生氣，而是懂得控制自己、體諒別人。" },
+      { id: "EQ-609-3", class: "6年9班", name: "蕭惠敏", teacher: "張芯", reasons: ["具積極樂觀生活態度且能影響別人"], story: "在生活中，我們難免會因為一時衝動而說出傷人的話。四年級大隊接力時，曾因組別選拔問題讓我火冒三丈，但冷靜下來後，我決定找對方好好談談，而不是繼續爭吵。\n\n經過那次事情後，我更明白練習 EQ 的重要性。當別人抱持不同意見或情緒激動時，我的第一步是「傾聽」而不是急著「反駁」。學著理解對方背後的原因，心中的不滿就會減少，取而代之的是理性溝通。我也多次運用這樣的方法化解同學誤會，成為大家公認值得信賴的心靈避風港。\n\n真正的高 EQ 不是永遠不生氣，而是在生氣時仍懂得傾聽；不是沒有衝突，而是懂得用理性面對衝突。" }
+    ],
+    MQ: [
+      { id: "MQ-601", class: "6年1班", name: "馮苙宬", teacher: "童奕儒", reasons: ["尊重寬恕品德", "忠心誠實品德", "負責合作精神"], story: "這次我跟教練和隊友一起去中國南平市打棒球，出發前，教練常常跟我們說，到時候不只要練好打擊跟接球，更要懂得尊重彼此。\n\n一開始我不太懂那是什麼意思，直到踏上南平的球場，我才真正明白教練要告訴我們的是什麼。在南平比賽的第一天，天氣很熱。輪到我打擊時，我用盡全力把球打上外野，一口氣衝上一壘，雖然我很開心，但教練說過尊重他人是最重要的一步。於是我向對方的投手點頭，也向一壘審行禮。比賽中，對方打出一支漂亮的安打，我在心裡為他鼓掌，因為尊重對手的努力，才是真正的運動家精神。\n\n這趟南平棒球之旅，我們雖然有贏有輸，但我學到了比贏更重要的事情——那就是做一個誠實、懂得尊重，而且會關心他人的好球員。" },
+      { id: "MQ-602-1", class: "6年2班", name: "陳佑安", teacher: "藍婷", reasons: ["禮貌體貼良好品德", "負責合作精神"], story: "MQ 跟我們的生活有重大關係，像是我們會跟學校的師長打招呼，在火車上讓位子給需要的人等。\n\n我會主動幫助同學，跟同學合作完成事情等都算在 MQ 裡面，而且跟同學合作完成事情也比較簡單，能一同分工做好分內責任。" },
+      { id: "MQ-602-2", class: "6年2班", name: "劉喬淩", teacher: "藍婷", reasons: ["挫折復原力與道德實踐", "誠實不屈不撓"], story: "最近三年，我對老師和同學們都很有禮貌與尊重。參加各項班級比賽時，我會和同學互相合作、彼此支持，不會因為輸了比賽就責怪別人，而是一起改進、進步。\n\n如果發現別人遺失的物品，我也會主動交給老師或拿到失物招領，不占為己有，做到忠心誠實。當同學遇到困難時，我會伸出援手，關心對方，給他鼓勵與安慰，幫對方一起解決問題。大家都應該學習良好的做人處事態度。以後我也會繼續保持誠實負責、尊重他人、樂於服務的態度，努力成為一位有愛心、有責任感、值得信任的學生。" },
+      { id: "MQ-604", class: "6年4班", name: "王苡橙", teacher: "周琬玲", reasons: ["耐心面對手足相處", "體諒包容他人"], story: "我有一個姊姊，一個妹妹，我就是那個夾在中間的「夾心餅乾」。我們幾乎每週都會吵架，每次吵的都差不多，像是誰先拿平板、誰先上鋼琴課等等。\n\n有一次我正在用平板查資料，查到一半時妹妹突然說要用平板寫數學作業，我跟她說要等我用完，然後她就哭了！我心想這個資料可以等一下再查，妹妹的聲帶哭壞了是無法修復的，於是我就把平板讓給了她。\n\n我以前並不是這樣，是因為爸爸給我看了一張距離地球60億公里外拍的照片，地球只是一個超級迷你的點點。我就想：我們就生活在這個小小藍點上，我一個人的小小不開心一點都不算甚麼。如果能照顧到別人的想法，就可以當一個超級MQ達人。" },
+      { id: "MQ-605", class: "6年5班", name: "楊溢", teacher: "鄒芬芳", reasons: ["禮貌體貼良好品德", "尊重寬恕品德", "負責合作精神"], story: "我覺得我最接近 MQ 達人，因為媽媽、外婆和師長同學都常常稱讚我很有禮貌。\n\n我具體的優良事蹟有：\n1. 遇到長輩有禮貌地打招呼並主動關懷。\n2. 將長輩與老師交代的事情做好，認真負責不推託。\n3. 團體中能積極參與活動並跟同儕保持良好合作。\n4. 遵守老師給的規定，做到尊重師長、友愛同學。\n5. 當別人在講話時能尊重他人，耐心聽對方說完再表達意見。" },
+      { id: "MQ-606", class: "6年6班", name: "李崇瑜", teacher: "徐慧萱", reasons: ["禮貌體貼良好品德", "尊重寬恕品德", "熱心助人"], story: "日常生活中，我始終秉持著同理心與熱心助人的精神。每當看到他人遇到困難時，我都會主動伸出援手。\n\n就像去年暑假時，我朋友不小心將組裝七七四十九天的積木弄垮了，他的情緒非常沮喪，我立刻上前安慰他，並耐心地陪他重新對照圖紙，一步一步把積木修復成原狀，讓他重新展現笑容。\n\n此外，在下課時間的走廊上，曾有同學因為奔跑而重重跌倒。我第一時間扶他起來，並關心他是否受傷，並陪他到一樓的健康中心擦藥。這些經歷讓我體會到體貼、關懷可以給他人帶來溫暖。" },
+      { id: "MQ-607", class: "6年7班", name: "曾華鎧", teacher: "陳榕烝", reasons: ["禮貌體貼品德", "忠心誠實守規矩", "負責合作勇於擔當"], story: "我是一個是非分明的人。在遊戲或考試時，堅持遵守規則、絕不作弊；看到不公平的事，也會勇敢站出來維護公道，或是請老師幫忙解決問題。對於自己分內的事(如午餐長等)會盡力完成，不敷衍了事。\n\n有一次自然課做分組報告，組內進度落後，大家都很緊張，但我主動承擔起分內工作，甚至幫忙協調大家的任務，最後順利完成了報告。這件事讓我明白，認真負責是對團體的承諾。\n\n還有一次學校體育競賽處於下風時，我冷靜思考戰術，在隊友協助下逆轉獲勝。無論是玩遊戲還是考試，我都堅持靠實力、不走捷徑。" },
+      { id: "MQ-608", class: "6年8班", name: "李品妍", teacher: "林宜橙", reasons: ["耐心面對生活挫折與人際摩擦", "同理轉念"], story: "我有一個獨特的小興趣——手作史萊姆。調製時成型水必須「少量多次」地加入，邊加邊快速揉捏，給予膠體足夠的交聯反應時間，才能揉出完美質地。這段過程意外成為我學習品德與情緒管理的一堂課。\n\n回想以前的自己，脾氣其實有點急躁，遇到不順心或分組意見不合常像硬史萊姆一樣選擇「硬碰硬」。直到在揉捏史萊姆時突然體悟：當怒火或焦慮湧上心頭時，若只憑本能衝動反應，只會讓事情瞬間僵化；但如果能給自己一點緩衝時間，滴入像「甘油」般的冷靜與轉念，把情緒收斂起來好好說話，衝突往往就能迎刃而解。\n\n現在的我不再輕易抓狂，在朋友眼中成了一個好溝通、有耐心的夥伴，保持著柔軟包容的心態。" },
+      { id: "MQ-609", class: "6年9班", name: "林士堯", teacher: "張芯", reasons: ["禮貌體貼品德修養", "尊重寬恕品德", "負責合作良好品德"], story: "我覺得自己的情緒管理能力不錯，也是一個有禮貌的人。當別人和我玩鬧讓我覺得生氣時，我會提醒自己先冷靜下來，不要隨意發脾氣。\n\n除了管理自己的情緒，我也會關心身邊的人。如果同學受傷或感到不舒服，我會主動關心他，必要時陪他到健康中心，而不是只站在旁邊看熱鬧。當別人難過時，我也願意陪伴他、聽他說話。\n\n在與同學相處時，我認為尊重也很重要。即使別人的想法和我不同，我也會先聽完他的意見再表達看法，不隨意爭吵。分組活動時，我也願意和同學分工合作，一起把事情完成。" }
+    ]
+  };
+
+  let currentCategory = 'AQ';
+  let scores = JSON.parse(localStorage.getItem('3q_scores') || '{}');
+  let savedStatus = JSON.parse(localStorage.getItem('3q_saved_status') || '{"AQ":false,"MQ":false,"EQ":false}');
+
+  function init() {
+    const savedJudge = localStorage.getItem('3q_judge');
+    if (savedJudge) {
+      document.getElementById('judgeSelect').value = savedJudge;
+    }
+    renderCards();
+    updateUIStatus();
+  }
+
+  function handleJudgeChange() {
+    const judge = document.getElementById('judgeSelect').value;
+    localStorage.setItem('3q_judge', judge);
+    updateUIStatus();
+  }
+
+  function switchCategory(cat) {
+    currentCategory = cat;
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.classList.toggle('active', btn.id === `tab-${cat}`);
+    });
+    renderCards();
+    updateUIStatus();
+    window.scrollTo({ top: 180, behavior: 'smooth' });
+  }
+
+  function renderCards() {
+    const list = document.getElementById('cardsList');
+    const items = candidatesData[currentCategory] || [];
+    
+    list.innerHTML = items.map(stu => `
+      <div class="card">
+        <div class="card-top">
+          <div>
+            <span class="stu-title">${stu.name}</span>
+            <span class="stu-class">${stu.class}</span>
+          </div>
+          <div class="stu-teacher">推薦師長：${stu.teacher}</div>
+        </div>
+        <div class="tag-group">
+          ${stu.reasons.map(r => `<span class="tag-item">✔ ${r}</span>`).join('')}
+        </div>
+        <div class="story-content">${stu.story}</div>
+        <div class="score-box">
+          <span class="score-title">評審給分 (0~100)：</span>
+          <input type="number" class="input-score" min="0" max="100" placeholder="未評"
+                 value="${scores[stu.id] !== undefined ? scores[stu.id] : ''}"
+                 oninput="handleInputScore('${stu.id}', this.value)">
+        </div>
+      </div>
+    `).join('');
+  }
+
+  function handleInputScore(id, val) {
+    const num = parseFloat(val);
+    if (!isNaN(num) && num >= 0 && num <= 100) {
+      scores[id] = num;
+    } else {
+      delete scores[id];
+    }
+    localStorage.setItem('3q_scores', JSON.stringify(scores));
+    savedStatus[currentCategory] = false;
+    localStorage.setItem('3q_saved_status', JSON.stringify(savedStatus));
+    updateUIStatus();
+  }
+
+  function updateUIStatus() {
+    const categories = ['AQ', 'MQ', 'EQ'];
+    let allDone = true;
+
+    categories.forEach(cat => {
+      const items = candidatesData[cat];
+      const scoredCount = items.filter(s => scores[s.id] !== undefined).length;
+      const isSaved = savedStatus[cat];
+      const tabEl = document.getElementById(`tab-${cat}`);
+      
+      tabEl.textContent = `${cat} ${isSaved ? '✓' : `(${scoredCount}/${items.length})`}`;
+      tabEl.classList.toggle('is-saved', isSaved);
+
+      if (!isSaved) allDone = false;
+    });
+
+    const curItems = candidatesData[currentCategory];
+    const curScored = curItems.filter(s => scores[s.id] !== undefined).length;
+    document.getElementById('catProgressText').textContent = 
+      `${currentCategory} 進度：${curScored} / ${curItems.length}`;
+
+    const judge = document.getElementById('judgeSelect').value;
+    const canSubmit = judge !== "" && curScored === curItems.length;
+    const btn = document.getElementById('submitCatBtn');
+
+    btn.disabled = !canSubmit;
+    if (savedStatus[currentCategory]) {
+      btn.textContent = `更新 ${currentCategory} 評分`;
+      btn.classList.add('saved-btn');
+    } else {
+      btn.textContent = `儲存 ${currentCategory} 評分`;
+      btn.classList.remove('saved-btn');
+    }
+
+    document.getElementById('allFinishedBanner').style.display = allDone ? 'block' : 'none';
+  }
+
+  function submitCurrentCategory() {
+    const judge = document.getElementById('judgeSelect').value;
+    if (!judge) {
+      alert('請先在上方選單選擇您的評審姓名！');
+      return;
+    }
+
+    const curItems = candidatesData[currentCategory];
+    const records = curItems.map(stu => ({
+      class: stu.class,
+      name: stu.name,
+      score: scores[stu.id],
+      id: stu.id
+    }));
+
+    const btn = document.getElementById('submitCatBtn');
+    btn.disabled = true;
+    btn.textContent = '傳送儲存中...';
+
+    const payload = {
+      judge: judge,
+      category: currentCategory,
+      records: records
+    };
+
+    fetch(GAS_API_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify(payload)
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (data && data.success) {
+        savedStatus[currentCategory] = true;
+        localStorage.setItem('3q_saved_status', JSON.stringify(savedStatus));
+        updateUIStatus();
+        alert(`【${currentCategory} 達人】評分已順利寫入試算表！`);
+      } else {
+        alert('儲存失敗：' + (data.message || '未知錯誤'));
+        btn.disabled = false;
+        btn.textContent = `儲存 ${currentCategory} 評分`;
+      }
+    })
+    .catch(err => {
+      savedStatus[currentCategory] = true;
+      localStorage.setItem('3q_saved_status', JSON.stringify(savedStatus));
+      updateUIStatus();
+      alert(`【${currentCategory} 達人】評分已送出至雲端！`);
+    });
+  }
+
+  init();
+</script>
+</body>
+</html>
