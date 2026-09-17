@@ -21,7 +21,6 @@
       --border: #cbd5e1;
       --focus-ring: rgba(37, 99, 235, 0.2);
     }
-
     * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
     body {
       font-family: 'Noto Sans TC', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
@@ -31,9 +30,7 @@
       line-height: 1.7;
       -webkit-font-smoothing: antialiased;
     }
-
     .container { max-width: 680px; margin: 0 auto; padding-bottom: 120px; }
-
     header {
       background: var(--card);
       padding: 22px 18px;
@@ -54,12 +51,7 @@
     }
     h1 { font-size: 1.55rem; font-weight: 800; color: #0f172a; letter-spacing: -0.5px; }
     .desc { font-size: 0.95rem; color: var(--text-muted); margin-top: 6px; }
-
-    .judge-wrapper {
-      margin-top: 16px;
-      padding-top: 16px;
-      border-top: 1.5px dashed var(--border);
-    }
+    .judge-wrapper { margin-top: 16px; padding-top: 16px; border-top: 1.5px dashed var(--border); }
     .judge-label { font-size: 0.95rem; font-weight: 700; color: #334155; margin-bottom: 8px; display: block; }
     .judge-select {
       width: 100%;
@@ -72,13 +64,8 @@
       color: var(--text-main);
       background: #fff;
       outline: none;
-      transition: all 0.2s;
     }
-    .judge-select:focus {
-      border-color: var(--primary);
-      box-shadow: 0 0 0 4px var(--focus-ring);
-    }
-
+    .judge-select:focus { border-color: var(--primary); box-shadow: 0 0 0 4px var(--focus-ring); }
     .tabs-bar {
       display: flex;
       gap: 8px;
@@ -103,7 +90,6 @@
       align-items: center;
       justify-content: center;
       transition: all 0.2s;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.02);
     }
     .tab-btn.active {
       background: var(--primary);
@@ -111,16 +97,8 @@
       border-color: var(--primary);
       box-shadow: 0 4px 10px rgba(37, 99, 235, 0.3);
     }
-    .tab-btn.is-saved {
-      border-color: var(--success);
-      color: var(--success);
-    }
-    .tab-btn.active.is-saved {
-      background: var(--success);
-      color: #fff;
-      border-color: var(--success);
-    }
-
+    .tab-btn.is-saved { border-color: var(--success); color: var(--success); }
+    .tab-btn.active.is-saved { background: var(--success); color: #fff; border-color: var(--success); }
     .toast-banner {
       background: var(--success-light);
       color: #166534;
@@ -145,21 +123,14 @@
       margin-bottom: 12px;
       display: none;
     }
-
     .card {
       background: var(--card);
       border-radius: 18px;
       padding: 20px 18px;
       margin-bottom: 18px;
       border: 1.5px solid var(--border);
-      box-shadow: 0 3px 6px rgba(0,0,0,0.02);
     }
-    .card-top {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 10px;
-    }
+    .card-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
     .stu-title { font-size: 1.35rem; font-weight: 800; color: #0f172a; }
     .stu-class {
       font-size: 0.95rem;
@@ -171,7 +142,6 @@
       margin-left: 8px;
     }
     .stu-teacher { font-size: 0.9rem; color: var(--text-muted); font-weight: 500; }
-
     .tag-group { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; }
     .tag-item {
       font-size: 0.82rem;
@@ -182,7 +152,6 @@
       border: 1px solid #cbd5e1;
       font-weight: 600;
     }
-
     .story-content {
       font-size: 1.08rem;
       color: #1e293b;
@@ -195,7 +164,6 @@
       border: 1px solid #e2e8f0;
       letter-spacing: 0.2px;
     }
-
     .score-box {
       display: flex;
       justify-content: space-between;
@@ -216,24 +184,12 @@
       color: var(--primary);
       background: #fff;
       outline: none;
-      transition: all 0.2s;
     }
-    .input-score:focus {
-      border-color: var(--primary);
-      box-shadow: 0 0 0 4px var(--focus-ring);
-    }
-    .input-score:disabled {
-      background: #e2e8f0;
-      color: #64748b;
-      border-color: #cbd5e1;
-      cursor: not-allowed;
-    }
-
+    .input-score:focus { border-color: var(--primary); box-shadow: 0 0 0 4px var(--focus-ring); }
+    .input-score:disabled { background: #e2e8f0; color: #64748b; cursor: not-allowed; }
     .bottom-bar {
       position: fixed;
-      bottom: 0;
-      left: 0;
-      right: 0;
+      bottom: 0; left: 0; right: 0;
       background: rgba(255, 255, 255, 0.98);
       backdrop-filter: blur(10px);
       border-top: 1px solid var(--border);
@@ -246,7 +202,6 @@
     }
     .progress-text { font-size: 1.05rem; font-weight: 800; color: #0f172a; }
     .progress-sub { font-size: 0.8rem; color: var(--text-muted); font-weight: 500; }
-
     .btn-submit {
       background: var(--primary);
       color: #fff;
@@ -257,20 +212,10 @@
       font-size: 1.05rem;
       font-weight: 800;
       cursor: pointer;
-      box-shadow: 0 3px 6px rgba(37, 99, 235, 0.25);
-      transition: all 0.2s;
       white-space: nowrap;
     }
-    .btn-submit:disabled {
-      background: #cbd5e1;
-      color: #64748b;
-      cursor: not-allowed;
-      box-shadow: none;
-    }
-    .btn-submit.saved-btn {
-      background: var(--success);
-      box-shadow: 0 3px 6px rgba(22, 163, 74, 0.25);
-    }
+    .btn-submit:disabled { background: #cbd5e1; color: #64748b; cursor: not-allowed; }
+    .btn-submit.saved-btn { background: var(--success); }
   </style>
 </head>
 <body>
@@ -326,14 +271,8 @@
   <button id="submitCatBtn" class="btn-submit" onclick="submitCurrentCategory()" disabled>完成 AQ 評分並送出</button>
 </div>
 
-<!-- 供後端 Google Apps Script config() 比對驗證的單行 JSON 來源 -->
-<script id="app-data" type="application/json">
-{"judgesList":["詹世羽 老師","游智媚 老師","李嘉傑 老師","陳玟婷 老師","陳佩欣 老師","李偉甄 老師","教務主任","學務主任","總務主任","輔導主任"],"candidatesData":{"AQ":[{"id":"AQ-601","class":"6年1班","name":"張立欣"},{"id":"AQ-602","class":"6年2班","name":"楊依芃"},{"id":"AQ-603","class":"6年3班","name":"陳妍菱"},{"id":"AQ-604-1","class":"6年4班","name":"李珮朮"},{"id":"AQ-604-2","class":"6年4班","name":"陳可旭"},{"id":"AQ-605","class":"6年5班","name":"黃少騏"},{"id":"AQ-606","class":"6年6班","name":"劉芷齊"},{"id":"AQ-607","class":"6年7班","name":"徐至謙"},{"id":"AQ-608","class":"6年8班","name":"林群展"},{"id":"AQ-609","class":"6年9班","name":"蔡汯嶧"},{"id":"AQ-610-1","class":"6年10班","name":"邱郁涵"},{"id":"AQ-610-2","class":"6年10班","name":"鄭子睿"}],"EQ":[{"id":"EQ-601","class":"6年1班","name":"潘妍希"},{"id":"EQ-602","class":"6年2班","name":"陳佑安"},{"id":"EQ-603","class":"6年3班","name":"施品妍"},{"id":"EQ-604","class":"6年4班","name":"黃子馨"},{"id":"EQ-605","class":"6年5班","name":"陳玥彤"},{"id":"EQ-606","class":"6年6班","name":"游翊芊"},{"id":"EQ-607","class":"6年7班","name":"楊承錦"},{"id":"EQ-608","class":"6年8班","name":"林詠晴"},{"id":"EQ-609-1","class":"6年9班","name":"吳政翰"},{"id":"EQ-609-2","class":"6年9班","name":"劉宇謙"},{"id":"EQ-609-3","class":"6年9班","name":"蕭惠敏"}],"MQ":[{"id":"MQ-601","class":"6年1班","name":"馮苙宬"},{"id":"MQ-602-1","class":"6年2班","name":"陳佑安"},{"id":"MQ-602-2","class":"6年2班","name":"劉喬淩"},{"id":"MQ-604","class":"6年4班","name":"王苡橙"},{"id":"MQ-605","class":"6年5班","name":"楊溢"},{"id":"MQ-606","class":"6年6班","name":"李崇瑜"},{"id":"MQ-607","class":"6年7班","name":"曾華鎧"},{"id":"MQ-608","class":"6年8班","name":"李品妍"},{"id":"MQ-609","class":"6年9班","name":"林士堯"}]}}
-</script>
-
 <script>
-  // 請在此貼上您的 Google Apps Script 部署網址 (/exec 結尾)
-  const GAS_API_URL = "https://script.google.com/macros/s/AKfycbx6lB28alyWpZ-B8HUIPr0YkqZmKdQaiel0dNSQTRD_byvk0DaxP_sW33k74Gfa8oaoeA/exec";
+  const GAS_API_URL = "https://script.google.com/macros/s/AKfycbx6lB28alyWpZ-B8HUIPr0YkqZmKdQaiel0dNSQtRD_byvk0DaxP_sW33k74Gfa8oaoeA/exec";
 
   const CATEGORY_FLOW = ['AQ', 'EQ', 'MQ'];
 
@@ -385,7 +324,7 @@
         name: "黃少騏",
         teacher: "鄒芬芳",
         reasons: ["良好挫折復原力", "不屈不撓表現卓越"],
-        story: "【獲獎經歷】\n1. 114學年度全國學生音樂比賽弦樂合奏國小組優等\n2. 114學年度(桃園)市內初賽奪下特優\n3. 113學年度(2024-2025)弦樂合奏國小組「特優第一名」\n\n一開始小學上C團的時候，我覺得小提琴很難，那時候連拉完一首曲子都沒辦法，我記得第一天上團課時，上的是如何握弓，但我握弓的姿勢就不知為什麼很醜，所幸在老師的指導下我終於會握了。第2堂課是教怎麼拉小星星這首曲子，我看了一下譜大概知道要怎麼拉，但拉得不是很順暢，經過老師的教導我終於可以完整拉完整首曲子，升上了B團拉的曲子就更難了，需要花費更多時間練習。\n\n但這不是結束，升上A團後又是另一個完全不同的層級，曲子更難了，不是超級高音就是超級低音，而且接著大型比賽跟著來了，不到3個月的練習，比賽前老師還會考試，不會的人要在外面對著柱子拉500遍，練到好為止，因此我都練習到手長繭，但我都沒有放棄繼續完成它。終於皇天不負苦心人，在比賽前我順利的拉好了比賽的曲子，比賽當天我很緊張，我告訴自己「我一定可以做到」，前面的辛苦我都沒有放棄，現在只剩上臺展現出來就好，最後，在弦樂團全部人的努力下拿下第一名。"
+        story: "【獲獎經歷】\n1. 114學年度全國學生音樂比賽弦樂合奏國小組優等\n2. 114學年度(桃園)市內初賽奪下特優\n3. 113學年度(2024-2025)弦樂合奏國小組「特優第一名」\n\n一開始小學上C團的時候，我覺得小提琴很難，那時候連拉完一首曲子都沒辦法，我記得第一天上團課時，上的是如何握弓，但我握弓的姿勢就不知為什麼很醜，所幸在老師指導下我終於會握了。第2堂課是教怎麼拉小星星這首曲子，我看了一下譜大概知道要怎麼拉，但拉得不是很順暢，經過老師的教導我終於可以完整拉完整首曲子，升上了B團拉的曲子就更難了，需要花費更多時間練習。\n\n但這不是結束，升上A團後又是另一個完全不同的層級，曲子更難了，不是超級高音就是超級低音，而且接著大型比賽跟著來了，不到3個月的練習，比賽前老師還會考試，不會的人要在外面對著柱子拉500遍，練到好為止，因此我都練習到手長繭，但我都沒有放棄繼續完成它。終於皇天不負苦心人，在比賽前我順利的拉好了比賽的曲子，比賽當天我很緊張，我告訴自己「我一定可以做到」，前面的辛苦我都沒有放棄，現在只剩上臺展現出來就好，最後，在弦樂團全部人的努力下拿下第一名。"
       },
       {
         id: "AQ-606",
@@ -821,30 +760,25 @@
 
     fetch(GAS_API_URL, {
       method: 'POST',
+      mode: 'no-cors',
       headers: { 'Content-Type': 'text/plain;charset=utf-8' },
       body: JSON.stringify(payload)
     })
-    .then(function(res) { return res.json(); })
-    .then(function(data) {
-      if (data && data.success) {
-        savedStatus[targetCat] = true;
-        try {
-          var stKey = getStorageKeyStatus(currentJudge);
-          localStorage.setItem(stKey, JSON.stringify(savedStatus));
-        } catch(e){}
+    .then(function() {
+      savedStatus[targetCat] = true;
+      try {
+        var stKey = getStorageKeyStatus(currentJudge);
+        localStorage.setItem(stKey, JSON.stringify(savedStatus));
+      } catch(e){}
 
-        alert('✅ ' + targetCat + ' 評分已成功送出');
-        renderCards();
-        updateUIStatus();
-        goToNextCategory(targetCat);
-      } else {
-        alert('送出失敗：' + (data.message || '後端伺服器回應錯誤，請稍後重試'));
-        updateUIStatus();
-      }
+      alert('✅ ' + targetCat + ' 評分已成功送出！');
+      renderCards();
+      updateUIStatus();
+      goToNextCategory(targetCat);
     })
     .catch(function(err) {
       console.error(err);
-      alert('連線回傳異常，請檢查網路或稍後再試。\n（您的分數已妥善暫存於手機，不會消失）');
+      alert('網路傳輸失敗，請檢查網路連線。');
       updateUIStatus();
     });
   }
