@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="zh-Hant"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>青溪國小 3Q達人評選</title>
+<style>
+:root{--ink:#17312d;--muted:#64756f;--green:#196b54;--line:#d8e3dd}*{box-sizing:border-box}body{margin:0;background:#f4f6f2;color:var(--ink);font-family:system-ui,"Microsoft JhengHei",sans-serif;line-height:1.7}header,main,.wrap{max-width:960px;margin:auto;padding:24px}header{padding-top:42px}h1{font-size:clamp(24px,5vw,34px);margin:5px 0 12px;letter-spacing:.03em}.eyebrow{color:var(--green);font-size:13px;letter-spacing:.12em;font-weight:700}p{margin:8px 0}.muted{color:var(--muted)}.intro{display:flex;justify-content:space-between;gap:28px;align-items:center}.identity{min-width:250px}label{display:block;font-weight:650}select,input,button{font:inherit}select{width:100%;padding:12px;border:1px solid var(--line);border-radius:9px;background:white}button{cursor:pointer;border:1px solid var(--line);border-radius:9px;padding:10px 16px;background:white;color:var(--ink)}button:disabled{cursor:not-allowed;opacity:.5}button:focus-visible,select:focus-visible,input:focus-visible{outline:3px solid #e0a947;outline-offset:3px}.nav{position:sticky;top:0;background:#f4f6f2f5;backdrop-filter:blur(10px);z-index:2;border-block:1px solid var(--line)}.nav .wrap{padding-block:12px}.tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.tab.active{background:var(--green);color:white;border-color:var(--green)}.tab small{display:block;font-size:12px}.progress{display:flex;align-items:center;justify-content:space-between;margin-top:12px;gap:12px}.bar{height:5px;background:#dce6df;border-radius:8px;margin-top:8px}.bar span{display:block;background:var(--green);height:100%;border-radius:8px}.notice{padding:12px 15px;border-radius:8px;background:#e8efe9;margin-top:14px;font-size:14px}.error{background:#fff0dd;color:#734b0c}.hidden{display:none!important}.student{border:1px solid var(--line);background:white;border-radius:14px;margin:0 0 20px;padding:24px}.student-head{display:flex;gap:16px;align-items:start;justify-content:space-between}.student h3{font-size:23px;margin:0}.index{color:var(--muted);font-size:12px}.tags{display:flex;gap:6px;flex-wrap:wrap;margin:14px 0}.tag{font-size:12px;padding:3px 9px;border-radius:5px;background:#edf3ed;color:#426352}.story{white-space:pre-wrap;line-height:1.95;font-size:16px;margin:18px 0 24px;overflow-wrap:anywhere}.score{display:flex;justify-content:space-between;align-items:center;gap:12px;border-top:1px solid var(--line);padding-top:18px}.score label{font-size:15px}.score input{width:100px;padding:9px;border:1px solid #a9bdb0;border-radius:8px;font-size:22px;font-weight:700;text-align:center;color:var(--green)}input:invalid{border-color:#af4d30}.score small{display:block;color:var(--muted);font-weight:400}.bottom{position:sticky;bottom:0;background:#fffffff5;border-top:1px solid var(--line);padding:12px 0;z-index:3}.bottom .wrap{padding-block:0;display:flex;gap:15px;align-items:center;justify-content:space-between}.primary{background:var(--green);border-color:var(--green);color:white;font-weight:700;min-width:160px}.conflict button{margin:8px 8px 0 0}h2{font-size:20px;margin:0 0 18px}footer{max-width:960px;margin:auto;padding:18px 24px 30px;color:var(--muted);font-size:12px}#message:empty{display:none}@media(max-width:640px){header,main,.wrap{padding:16px}header{padding-top:24px}.intro{display:block}.identity{margin-top:20px}.student{padding:18px}.tabs{gap:6px}.tab{padding:9px 5px;font-size:14px}.student-head{gap:8px}.student h3{font-size:21px}.bottom .wrap{gap:8px}.primary{min-width:140px}.bottom small{font-size:12px}.progress{font-size:14px}}
+</style></head><body>
+<header><div class="eyebrow">青溪國小 · 六年級 · 115學年度</div><div class="intro"><div><h1>3Q達人評選</h1><p class="muted">閱讀每位孩子的故事，留下您的評分。<br>每類別完成後可先儲存，稍後再繼續。</p></div><div class="identity"><label for="judge">評審委員</label><select id="judge"><option value="">請選擇您的姓名</option></select></div></div><div id="mode" class="notice hidden"></div><div id="storageError" class="notice error hidden">本機暫存不可用，離開頁面可能遺失未送出分數。請先匯出草稿或完成雲端儲存。</div><div id="message" role="status" aria-live="polite" class="notice"></div></header>
+<nav class="nav" aria-label="評分類別"><div class="wrap"><div class="tabs" role="tablist"></div><div class="progress"><span id="progress">請先選擇評審姓名</span><button id="sync" type="button">重新同步</button></div><div class="bar" role="progressbar" aria-label="本類填寫進度" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><span></span></div></div></nav>
+<main><div id="conflict" class="notice error conflict hidden"><strong>雲端分數與本機草稿不同</strong><p>本機修改已保留。選擇這次要繼續使用的版本；保留本機後仍須按儲存才會更新雲端。</p><button id="useCloud">使用雲端版本</button><button id="keepLocal">保留本機草稿</button></div><h2 id="heading">AQ 逆境智商</h2><div id="candidates"></div></main>
+<div class="bottom"><div class="wrap"><small id="saveInfo">輸入即暫存於這部裝置</small><button id="save" class="primary" disabled>儲存此類別</button></div></div>
+<footer>0～100分，可使用小數。評分僅供評選使用。<button id="backup">匯出本機草稿</button></footer>
+<!-- APP_DATA -->
+<script>
+'use strict';
+const CONFIG=JSON.parse(document.getElementById('app-data').textContent);
+const judgesList=CONFIG.judgesList,candidatesData=CONFIG.candidatesData;
+const cats=['AQ','MQ','EQ'],titles={AQ:'AQ 逆境智商',MQ:'MQ 道德智商',EQ:'EQ 情緒智商'};
+const $=id=>document.getElementById(id),clone=x=>JSON.parse(JSON.stringify(x));
+let judge='',category='AQ',draft=null,cloud=null,loaded=false,busy=false,sequence=0,conflicts={};
+const key=j=>'qingxi-3q:'+CONFIG.eventId+':'+j;
+const blank=()=>Object.fromEntries(cats.map(c=>[c,{scores:{},baseVersion:'',dirty:false,requestId:''}]));
+function message(text,error=false){$('message').textContent=text;$('message').classList.toggle('error',error);}
+function read(j){try{const v=JSON.parse(localStorage.getItem(key(j)));if(!v)return blank();const out=blank();cats.forEach(c=>{if(v[c]&&typeof v[c].scores==='object'&&v[c].scores){out[c]={...out[c],...v[c]};}});return out;}catch{return blank();}}
+function persist(){if(!judge||!draft)return;try{localStorage.setItem(key(judge),JSON.stringify(draft));$('storageError').classList.add('hidden');}catch{$('storageError').classList.remove('hidden');}}
+function valid(v){return v!==''&&v!==null&&v!==undefined&&Number.isFinite(Number(v))&&Number(v)>=0&&Number(v)<=100;}
+function count(c){return candidatesData[c].filter(s=>draft&&valid(draft[c].scores[s.id])).length;}
+function same(a,b){return Object.keys(a).length===Object.keys(b).length&&Object.keys(a).every(k=>String(a[k])===String(b[k]));}
+function rpc(name,arg){return new Promise((resolve,reject)=>{if(!window.google?.script?.run){reject(Error('此檔尚未連接雲端，請使用部署後的評選網址。'));return;}const timer=setTimeout(()=>reject(Error('連線逾時，請重新同步或重試')),45000);google.script.run.withSuccessHandler(v=>{clearTimeout(timer);resolve(v);}).withFailureHandler(e=>{clearTimeout(timer);reject(e);})[name](arg);});}
+function update(){
+ document.querySelectorAll('.tab').forEach(b=>{const c=b.dataset.cat;b.classList.toggle('active',c===category);b.setAttribute('aria-selected',String(c===category));b.disabled=busy;b.querySelector('small').textContent=draft?(conflicts[c]?'版本待確認':draft[c].dirty?'有未送出修改':cloud?.savedStatus[c]?'✓ 已儲存':`${count(c)} / ${candidatesData[c].length}`):`${candidatesData[c].length}位候選人`;});
+ const n=count(category),total=candidatesData[category].length;
+ $('progress').textContent=judge?`${category} 已填 ${n} / ${total} 人`:'請先選擇評審姓名';
+ document.querySelector('.bar span').style.width=(n/total*100)+'%';document.querySelector('.bar').setAttribute('aria-valuenow',Math.round(n/total*100));
+ $('judge').disabled=busy;$('sync').disabled=!judge||busy;
+ $('save').disabled=!judge||!loaded||busy||!cloud?.open||Boolean(conflicts[category])||n!==total;
+ $('save').textContent=busy?'處理中…':'儲存此類別';
+ $('saveInfo').textContent=!judge?'請先選擇姓名':busy?'請稍候，您的草稿仍保留':!loaded?'尚未完成雲端同步':!cloud.open?'目前停止收件':draft[category].dirty?'本機草稿尚未送出':cloud.savedStatus[category]?`✓ 已儲存 ${cloud.times?.[category]||''}`:'輸入即暫存於這部裝置';
+ $('conflict').classList.toggle('hidden',!conflicts[category]);
+ document.querySelectorAll('.score input').forEach(el=>el.disabled=!judge||busy);
+ $('useCloud').disabled=$('keepLocal').disabled=busy;
+}
+function render(){
+ $('heading').textContent=titles[category];$('candidates').replaceChildren();
+ candidatesData[category].forEach((s,i)=>{
+  const article=document.createElement('article');article.className='student';
+  // All candidate strings go through textContent, never HTML interpolation.
+  article.innerHTML='<div class="student-head"><div><div class="index"></div><h3></h3></div><div class="muted teacher"></div></div><div class="tags"></div><p class="story"></p><div class="score"><label>委員評分<small>請輸入0～100分</small></label><div><input type="number" min="0" max="100" step="any" inputmode="decimal" autocomplete="off"> 分</div></div>';
+  article.querySelector('.index').textContent=String(i+1).padStart(2,'0')+' / '+s.class;
+  article.querySelector('h3').textContent=s.name;article.querySelector('.teacher').textContent='推薦師長：'+s.teacher;
+  s.reasons.forEach(reason=>{const tag=document.createElement('span');tag.className='tag';tag.textContent=reason;article.querySelector('.tags').append(tag);});
+  article.querySelector('.story').textContent=s.story;
+  const input=article.querySelector('input');input.id='score-'+s.id;article.querySelector('label').htmlFor=input.id;
+  input.value=draft?.[category].scores[s.id]??'';
+  input.addEventListener('input',()=>{draft[category].scores[s.id]=input.value;draft[category].dirty=true;draft[category].requestId='';persist();update();});
+  $('candidates').append(article);
+ });update();
+}
+async function sync(){
+ if(!judge||busy)return;const token=++sequence,selected=judge;busy=true;loaded=false;update();message('正在讀取您的雲端進度…');
+ try{
+  const result=await rpc('getJudgeStatus',selected);if(token!==sequence||selected!==judge)return;
+  if(result.eventId!==CONFIG.eventId)throw Error('活動版本已更新，請重新整理');cloud=result;conflicts={};
+  cats.forEach(c=>{
+   const local=draft[c],remote=result.scores[c],version=result.versions[c];
+   if(local.dirty){
+    if(same(local.scores,remote)){draft[c]={scores:remote,baseVersion:version,dirty:false,requestId:''};}
+    else if(local.baseVersion!==version)conflicts[c]=true;
+   }else draft[c]={scores:remote,baseVersion:version,dirty:false,requestId:''};
+  });loaded=true;persist();message(result.open?'雲端同步完成，本機未送出修改會保留。':'目前停止收件，可查看已存分數；本機修改仍會保留。');
+ }catch(e){message('同步失敗：'+(e.message||e)+' 您仍可填寫本機草稿，連線後按重新同步。',true);}
+ finally{if(token===sequence){busy=false;render();}}
+}
+async function save(){
+ if($('save').disabled)return;const c=category,j=judge;
+ const d=draft[c];if(!d.requestId)d.requestId=crypto.randomUUID?crypto.randomUUID():Date.now()+'-'+Math.random().toString(36).slice(2);
+ persist();busy=true;update();message('正在儲存 '+c+'…');
+ try{
+  const result=await rpc('saveCategoryScores',{judge:j,category:c,eventId:CONFIG.eventId,baseVersion:d.baseVersion,requestId:d.requestId,records:candidatesData[c].map(s=>({id:s.id,score:Number(d.scores[s.id])}))});
+  if(!result.success){if(result.code==='CONFLICT')loaded=false;throw Error(result.message);}
+  d.dirty=false;d.baseVersion=result.version;d.requestId='';cloud.savedStatus[c]=true;cloud.scores[c]=clone(d.scores);cloud.versions[c]=result.version;cloud.times[c]=result.time;persist();message(result.warning||c+' 已成功儲存；您可以繼續其他類別。');
+ }catch(e){message('未確認儲存成功：'+(e.message||e)+' 草稿已保留，請重試或重新同步。',true);}
+ finally{busy=false;update();}
+}
+judgesList.forEach(j=>{const o=document.createElement('option');o.value=o.textContent=j;$('judge').append(o);});
+cats.forEach(c=>{const b=document.createElement('button');b.className='tab';b.dataset.cat=c;b.setAttribute('role','tab');b.append(document.createTextNode(titles[c]));b.append(document.createElement('small'));b.onclick=()=>{if(!busy){category=c;render();}};document.querySelector('.tabs').append(b);});
+$('judge').onchange=()=>{sequence++;judge=$('judge').value;draft=judge?read(judge):null;cloud=null;loaded=false;conflicts={};render();if(judge)sync();else message('');};
+$('sync').onclick=sync;$('save').onclick=save;
+$('useCloud').onclick=()=>{draft[category]={scores:clone(cloud.scores[category]),baseVersion:cloud.versions[category],dirty:false,requestId:''};delete conflicts[category];persist();render();message('已使用此類別的雲端版本。');};
+$('keepLocal').onclick=()=>{draft[category].baseVersion=cloud.versions[category];draft[category].requestId='';delete conflicts[category];persist();render();message('已保留本機草稿，請檢查後儲存此類別。');};
+$('backup').onclick=()=>{if(!judge){message('請先選擇姓名。',true);return;}const url=URL.createObjectURL(new Blob([JSON.stringify({eventId:CONFIG.eventId,judge,draft},null,2)],{type:'application/json'}));const a=document.createElement('a');a.href=url;a.download='3Q草稿_'+judge+'.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);};
+window.addEventListener('storage',e=>{if(judge&&e.key===key(judge)){message('同一裝置的另一分頁更動了草稿；目前畫面保持原狀，請先匯出備份再重新載入。',true);}});
+window.addEventListener('beforeunload',e=>{if(busy||draft&&cats.some(c=>draft[c].dirty)){e.preventDefault();e.returnValue='';}});
+if(!window.google?.script?.run){$('mode').classList.remove('hidden');$('mode').textContent='本機預覽：可閱讀事蹟並保留草稿，尚未連接Google試算表。正式儲存請使用部署網址。';}
+render();
+</script></body></html>

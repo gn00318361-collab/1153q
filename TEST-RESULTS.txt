@@ -1,0 +1,1 @@
+39 checks passed. Google Sheets and Apps Script services mocked; live deployment validation still required.
