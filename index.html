@@ -727,8 +727,8 @@ const CATEGORY_FLOW = ["AQ", "EQ", "MQ"];
 
 let currentCategory = 'AQ';
 let currentJudge = '';
-let scores = {}; // 僅存當前評審本地的未送出草稿
-let savedStatus = {}; // 各類別是否已完成
+let scores = {};
+let savedStatus = {};
 let versions = {};
 let requests = {};
 let busy = false;
@@ -742,10 +742,15 @@ const githubMode = location.origin === GITHUB_ORIGIN;
 let bridgeReady = null, bridgeFrame = null, bridgeSource = null, bridgeOrigin = '', bridgeChannel = '', bridgeListener = null;
 const bridgePending = new Map();
 
+// 放寬驗證 Google 沙盒與執行環境網域
 function googleOrigin(origin) {
   try {
     const u = new URL(origin);
-    return u.protocol === 'https:' && (u.hostname === 'script.google.com' || u.hostname === 'script.googleusercontent.com' || /^n-[a-z0-9-]+-script\.googleusercontent\.com$/.test(u.hostname));
+    return u.protocol === 'https:' && (
+      u.hostname === 'script.google.com' ||
+      u.hostname.endsWith('.script.googleusercontent.com') ||
+      u.hostname.endsWith('.googleusercontent.com')
+    );
   } catch {
     return false;
   }
@@ -857,7 +862,6 @@ function handleJudgeChange() {
 
   try {
     localStorage.setItem('3q_current_judge', currentJudge);
-    // 只讀取屬於當前評審本地的草稿
     scores = JSON.parse(localStorage.getItem(getStorageKeyScores(currentJudge)) || '{}') || {};
     requests = JSON.parse(localStorage.getItem(metaKey(currentJudge)) || '{}') || {};
   } catch {
@@ -875,7 +879,6 @@ function handleJudgeChange() {
   }
 }
 
-// 安全同步：不再接收 scores，只更新類別完成狀態
 async function syncJudge() {
   if (!currentJudge || busy) return;
   busy = true;
@@ -890,7 +893,6 @@ async function syncJudge() {
     CATEGORY_FLOW.forEach(c => {
       savedStatus[c] = result.savedStatus[c] === true;
       versions[c] = result.versions ? result.versions[c] : '';
-      // 若該類別已送出完成，清理本機暫存分數以確保隱私無殘留
       if (savedStatus[c]) {
         delete requests[c];
         candidatesData[c].forEach(s => { delete scores[s.id]; });
@@ -922,7 +924,6 @@ function renderCards() {
   container.replaceChildren();
   $('categoryHeading').textContent = currentCategory + ' ' + titles[currentCategory];
 
-  // 安全核心：已完成類別直接顯示確認卡片，絕不顯示舊分數欄位
   if (savedStatus[currentCategory]) {
     const lockedCard = document.createElement('div');
     lockedCard.className = 'category-locked-banner';
@@ -935,7 +936,6 @@ function renderCards() {
     return;
   }
 
-  // 未完成類別才渲染學生名單與分數輸入框
   candidatesData[currentCategory].forEach(s => {
     const card = document.createElement('article');
     card.className = 'card';
@@ -1039,7 +1039,6 @@ async function submitCurrentCategory() {
     savedStatus[cat] = true;
     versions[cat] = result.version;
     delete requests[cat];
-    // 送出成功後，徹底清理本機此向度暫存分數
     candidatesData[cat].forEach(s => { delete scores[s.id]; });
     persist();
 
