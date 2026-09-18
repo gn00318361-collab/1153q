@@ -705,7 +705,40 @@ const CONFIG=JSON.parse(document.getElementById("app-data").textContent);
 const candidatesData=CONFIG.candidatesData;
 const CATEGORY_FLOW=["AQ","EQ","MQ"];
   let currentCategory='AQ',currentJudge='',scores={},savedStatus={},versions={},requests={},busy=false,loaded=false,cloudOpen=false;
-  const previewMode=!window.google?.script?.run;
+// GitHub keeps the page and drafts. A restricted Apps Script frame handles RPC.
+const GITHUB_ORIGIN='https://gn00318361-collab.github.io';
+const GAS_URL='https://script.google.com/macros/s/AKfycbx6lB28alyWpZ-B8HUIPr0YkqZmKdQaiel0dNSQtRD_byvk0DaxP_sW33k74Gfa8oaoeA/exec';
+const githubMode=location.origin===GITHUB_ORIGIN;
+let bridgeReady=null,bridgeFrame=null,bridgeSource=null,bridgeOrigin='',bridgeChannel='',bridgeListener=null;
+const bridgePending=new Map();
+function googleOrigin(origin){try{const u=new URL(origin);return u.protocol==='https:'&&(u.hostname==='script.google.com'||u.hostname==='script.googleusercontent.com'||/^n-[a-z0-9-]+-script\.googleusercontent\.com$/.test(u.hostname));}catch{return false;}}
+function connectBridge(){
+ if(bridgeReady)return bridgeReady;
+ bridgeReady=new Promise((resolve,reject)=>{
+  bridgeChannel=crypto.randomUUID();
+  const timer=setTimeout(()=>{if(bridgeListener)window.removeEventListener('message',bridgeListener);bridgeFrame?.remove();bridgeSource=null;bridgeReady=null;reject(Error('無法連接評分服務，請確認 Apps Script 已更新部署，或稍後按重新同步；已填分數仍保留。'));},30000);
+  bridgeListener=e=>{
+   const m=e.data;if(!m||m.protocol!=='qingxi-3q-bridge-v1'||m.channel!==bridgeChannel||!googleOrigin(e.origin))return;
+   if(m.type==='ready'&&!bridgeSource){bridgeSource=e.source;bridgeOrigin=e.origin;clearTimeout(timer);resolve();return;}
+   if(e.source!==bridgeSource||e.origin!==bridgeOrigin||m.type!=='result')return;
+   const pending=bridgePending.get(m.id);if(!pending)return;bridgePending.delete(m.id);clearTimeout(pending.timer);
+   if(m.ok===true)pending.resolve(m.result);else pending.reject(Error(m.error||'雲端服務回覆失敗'));
+  };
+  window.addEventListener('message',bridgeListener);
+  bridgeFrame=document.createElement('iframe');bridgeFrame.title='評分資料連線';bridgeFrame.hidden=true;
+  bridgeFrame.src=GAS_URL+'?page=bridge&channel='+encodeURIComponent(bridgeChannel);document.body.append(bridgeFrame);
+ });return bridgeReady;
+}
+async function githubRpc(name,arg){
+ if(!['getJudgeStatus','saveCategoryScores'].includes(name))throw Error('不支援此操作');
+ await connectBridge();
+ return new Promise((resolve,reject)=>{
+  const id=crypto.randomUUID();const timer=setTimeout(()=>{bridgePending.delete(id);reject(Error('尚未收到儲存確認，請重新同步確認；草稿仍保留。'));},45000);
+  bridgePending.set(id,{resolve,reject,timer});bridgeSource.postMessage({protocol:'qingxi-3q-bridge-v1',channel:bridgeChannel,type:'call',id,name,arg},bridgeOrigin);
+ });
+}
+
+  const previewMode=!window.google?.script?.run&&!githubMode;
   const $=id=>document.getElementById(id);
   const titles={AQ:'逆境智商達人',EQ:'情緒智商達人',MQ:'道德智商達人'};
   const valid=v=>v!==''&&v!==null&&v!==undefined&&Number.isFinite(Number(v))&&Number(v)>=0&&Number(v)<=100;
@@ -715,7 +748,7 @@ const CATEGORY_FLOW=["AQ","EQ","MQ"];
   const next=()=>CATEGORY_FLOW.find(c=>!savedStatus[c]);
   function notify(text){$('flowMessage').textContent=text;}
   function persist(){if(!currentJudge)return;try{localStorage.setItem(getStorageKeyScores(currentJudge),JSON.stringify(scores));localStorage.setItem(metaKey(currentJudge),JSON.stringify(requests));}catch{notify('本機暫存不可用，請保持頁面開啟並完成送出。');}}
-  function rpc(name,arg){return new Promise((resolve,reject)=>{
+  function rpc(name,arg){if(githubMode)return githubRpc(name,arg);return new Promise((resolve,reject)=>{
     if(!window.google?.script?.run)return reject(Error('請使用 Google Apps Script 的正式評選網址；本機與 GitHub 頁面僅可預覽。'));
     const timer=setTimeout(()=>reject(Error('連線逾時，請重新同步確認；草稿仍保留')),45000);
     google.script.run.withSuccessHandler(v=>{clearTimeout(timer);resolve(v);}).withFailureHandler(e=>{clearTimeout(timer);reject(e);})[name](arg);
@@ -769,6 +802,8 @@ const CATEGORY_FLOW=["AQ","EQ","MQ"];
     CATEGORY_FLOW.forEach(c=>{const tab=$('tab-'+c);tab.textContent=savedStatus[c]?c+' ✓ 已完成':c+' '+count(c)+' / '+candidatesData[c].length;tab.disabled=busy||(!previewMode&&(!currentJudge||(!savedStatus[c]&&c!==active)));tab.classList.toggle('active',c===currentCategory);tab.classList.toggle('is-saved',!!savedStatus[c]);});
     $('catProgressText').textContent=currentCategory+' 評分進度：'+count(currentCategory)+' / '+candidatesData[currentCategory].length;
     $('submitCatBtn').disabled=busy||!loaded||!cloudOpen||!currentJudge||!!savedStatus[currentCategory]||currentCategory!==active||count(currentCategory)!==candidatesData[currentCategory].length;
+    $('submitCatBtn').title=previewMode?'本機檔案不能送出，請使用 GitHub 評選網址':!currentJudge?'請先選擇姓名':!loaded?'請先完成雲端同步':!cloudOpen?'目前停止收件':count(currentCategory)!==candidatesData[currentCategory].length?'請填齊全部有效分數':'';
+    document.querySelector('.progress-sub').textContent=busy?'傳送中，請稍候':$('submitCatBtn').title||'已填分數自動暫存於這部裝置';
     $('submitCatBtn').textContent=busy?'傳送中…':savedStatus[currentCategory]?currentCategory+' 已完成 ✓':'完成 '+currentCategory+' 評分並送出';
     $('judgeSelect').disabled=busy;$('syncJudge').disabled=previewMode||busy||!currentJudge;
     document.querySelectorAll('.input-score').forEach(el=>el.disabled=busy||!currentJudge||!!savedStatus[currentCategory]||currentCategory!==active);
