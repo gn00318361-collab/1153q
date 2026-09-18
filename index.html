@@ -115,13 +115,19 @@
     .category-locked-banner {
       background: #f0fdf4;
       color: #15803d;
-      border: 1px solid #bbf7d0;
-      padding: 10px 14px;
-      border-radius: 10px;
-      font-size: 0.92rem;
-      font-weight: 700;
-      margin-bottom: 12px;
-      display: none;
+      border: 1.5px solid #86efac;
+      padding: 24px 16px;
+      border-radius: 16px;
+      font-size: 1rem;
+      text-align: center;
+      margin-bottom: 16px;
+      box-shadow: 0 2px 6px rgba(22, 163, 74, 0.06);
+    }
+    .category-locked-banner h3 {
+      font-size: 1.25rem;
+      font-weight: 800;
+      margin-bottom: 6px;
+      color: #166534;
     }
     .card {
       background: var(--card);
@@ -216,7 +222,21 @@
     }
     .btn-submit:disabled { background: #cbd5e1; color: #64748b; cursor: not-allowed; }
     .btn-submit.saved-btn { background: var(--success); }
-  #flowMessage{margin-top:16px;overflow-wrap:anywhere}#syncJudge{padding:10px;margin-top:8px}#categoryHeading{margin:16px 0}.tab-btn:disabled{cursor:default;opacity:.65}.bottom-bar{position:sticky;bottom:0;flex-wrap:wrap}.story-content{overflow-wrap:anywhere}@media(max-width:480px){.bottom-bar{gap:8px;padding:12px}.btn-submit{width:100%;min-height:52px}.card-top{flex-wrap:wrap}.score-box{gap:6px;padding:10px}.score-title{font-size:15px}.tab-btn{font-size:14px}} </style>
+    #flowMessage { margin-top: 16px; overflow-wrap: anywhere; }
+    #syncJudge { padding: 10px; margin-top: 8px; }
+    #categoryHeading { margin: 16px 0; }
+    .tab-btn:disabled { cursor: default; opacity: .65; }
+    .bottom-bar { position: sticky; bottom: 0; flex-wrap: wrap; }
+    .story-content { overflow-wrap: anywhere; }
+    @media(max-width: 480px) {
+      .bottom-bar { gap: 8px; padding: 12px; }
+      .btn-submit { width: 100%; min-height: 52px; }
+      .card-top { flex-wrap: wrap; }
+      .score-box { gap: 6px; padding: 10px; }
+      .score-title { font-size: 15px; }
+      .tab-btn { font-size: 14px; }
+    }
+  </style>
 </head>
 <body>
 
@@ -248,7 +268,9 @@
         <option value="輔導主任">輔導主任</option>
       </select>
     </div>
-  <div id="flowMessage" role="status" aria-live="polite"></div><button id="syncJudge" type="button" onclick="syncJudge()">重新同步</button></header>
+    <div id="flowMessage" role="status" aria-live="polite"></div>
+    <button id="syncJudge" type="button" onclick="syncJudge()">重新同步</button>
+  </header>
 
   <div class="tabs-bar">
     <button class="tab-btn active" id="tab-AQ" onclick="switchCategory('AQ')">AQ</button>
@@ -256,11 +278,8 @@
     <button class="tab-btn" id="tab-MQ" onclick="switchCategory('MQ')">MQ</button>
   </div>
 
-  <div id="categoryLockedBanner" class="category-locked-banner">
-    ✅ 此類別評分已成功送出並鎖定。
-  </div>
-
-  <h2 id="categoryHeading"></h2><div id="cardsList"></div>
+  <h2 id="categoryHeading"></h2>
+  <div id="cardsList"></div>
 </div>
 
 <div class="bottom-bar">
@@ -700,129 +719,342 @@
       }
     ]
   }
-}</script><script>
-const CONFIG=JSON.parse(document.getElementById("app-data").textContent);
-const candidatesData=CONFIG.candidatesData;
-const CATEGORY_FLOW=["AQ","EQ","MQ"];
-  let currentCategory='AQ',currentJudge='',scores={},savedStatus={},versions={},requests={},busy=false,loaded=false,cloudOpen=false;
-// GitHub keeps the page and drafts. A restricted Apps Script frame handles RPC.
-const GITHUB_ORIGIN='https://gn00318361-collab.github.io';
-const GAS_URL='https://script.google.com/macros/s/AKfycbx6lB28alyWpZ-B8HUIPr0YkqZmKdQaiel0dNSQtRD_byvk0DaxP_sW33k74Gfa8oaoeA/exec';
-const githubMode=location.origin===GITHUB_ORIGIN;
-let bridgeReady=null,bridgeFrame=null,bridgeSource=null,bridgeOrigin='',bridgeChannel='',bridgeListener=null;
-const bridgePending=new Map();
-function googleOrigin(origin){try{const u=new URL(origin);return u.protocol==='https:'&&(u.hostname==='script.google.com'||u.hostname==='script.googleusercontent.com'||/^n-[a-z0-9-]+-script\.googleusercontent\.com$/.test(u.hostname));}catch{return false;}}
-function connectBridge(){
- if(bridgeReady)return bridgeReady;
- bridgeReady=new Promise((resolve,reject)=>{
-  bridgeChannel=crypto.randomUUID();
-  const timer=setTimeout(()=>{if(bridgeListener)window.removeEventListener('message',bridgeListener);bridgeFrame?.remove();bridgeSource=null;bridgeReady=null;reject(Error('無法連接評分服務，請確認 Apps Script 已更新部署，或稍後按重新同步；已填分數仍保留。'));},30000);
-  bridgeListener=e=>{
-   const m=e.data;if(!m||m.protocol!=='qingxi-3q-bridge-v1'||m.channel!==bridgeChannel||!googleOrigin(e.origin))return;
-   if(m.type==='ready'&&!bridgeSource){bridgeSource=e.source;bridgeOrigin=e.origin;clearTimeout(timer);resolve();return;}
-   if(e.source!==bridgeSource||e.origin!==bridgeOrigin||m.type!=='result')return;
-   const pending=bridgePending.get(m.id);if(!pending)return;bridgePending.delete(m.id);clearTimeout(pending.timer);
-   if(m.ok===true)pending.resolve(m.result);else pending.reject(Error(m.error||'雲端服務回覆失敗'));
-  };
-  window.addEventListener('message',bridgeListener);
-  bridgeFrame=document.createElement('iframe');bridgeFrame.title='評分資料連線';bridgeFrame.hidden=true;
-  bridgeFrame.src=GAS_URL+'?page=bridge&channel='+encodeURIComponent(bridgeChannel);document.body.append(bridgeFrame);
- });return bridgeReady;
-}
-async function githubRpc(name,arg){
- if(!['getJudgeStatus','saveCategoryScores'].includes(name))throw Error('不支援此操作');
- await connectBridge();
- return new Promise((resolve,reject)=>{
-  const id=crypto.randomUUID();const timer=setTimeout(()=>{bridgePending.delete(id);reject(Error('尚未收到儲存確認，請重新同步確認；草稿仍保留。'));},45000);
-  bridgePending.set(id,{resolve,reject,timer});bridgeSource.postMessage({protocol:'qingxi-3q-bridge-v1',channel:bridgeChannel,type:'call',id,name,arg},bridgeOrigin);
- });
+}</script>
+<script>
+const CONFIG = JSON.parse(document.getElementById("app-data").textContent);
+const candidatesData = CONFIG.candidatesData;
+const CATEGORY_FLOW = ["AQ", "EQ", "MQ"];
+
+let currentCategory = 'AQ';
+let currentJudge = '';
+let scores = {}; // 僅存當前評審本地的未送出草稿
+let savedStatus = {}; // 各類別是否已完成
+let versions = {};
+let requests = {};
+let busy = false;
+let loaded = false;
+let cloudOpen = false;
+
+const GITHUB_ORIGIN = 'https://gn00318361-collab.github.io';
+const GAS_URL = 'https://script.google.com/macros/s/AKfycbx6lB28alyWpZ-B8HUIPr0YkqZmKdQaiel0dNSQtRD_byvk0DaxP_sW33k74Gfa8oaoeA/exec';
+const githubMode = location.origin === GITHUB_ORIGIN;
+
+let bridgeReady = null, bridgeFrame = null, bridgeSource = null, bridgeOrigin = '', bridgeChannel = '', bridgeListener = null;
+const bridgePending = new Map();
+
+function googleOrigin(origin) {
+  try {
+    const u = new URL(origin);
+    return u.protocol === 'https:' && (u.hostname === 'script.google.com' || u.hostname === 'script.googleusercontent.com' || /^n-[a-z0-9-]+-script\.googleusercontent\.com$/.test(u.hostname));
+  } catch {
+    return false;
+  }
 }
 
-  const previewMode=!window.google?.script?.run&&!githubMode;
-  const $=id=>document.getElementById(id);
-  const titles={AQ:'逆境智商達人',EQ:'情緒智商達人',MQ:'道德智商達人'};
-  const valid=v=>v!==''&&v!==null&&v!==undefined&&Number.isFinite(Number(v))&&Number(v)>=0&&Number(v)<=100;
-  const getStorageKeyScores=j=>'3q_scores_'+j.trim();
-  const metaKey=j=>'3q_request_'+j.trim();
-  const count=c=>candidatesData[c].filter(s=>valid(scores[s.id])).length;
-  const next=()=>CATEGORY_FLOW.find(c=>!savedStatus[c]);
-  function notify(text){$('flowMessage').textContent=text;}
-  function persist(){if(!currentJudge)return;try{localStorage.setItem(getStorageKeyScores(currentJudge),JSON.stringify(scores));localStorage.setItem(metaKey(currentJudge),JSON.stringify(requests));}catch{notify('本機暫存不可用，請保持頁面開啟並完成送出。');}}
-  function rpc(name,arg){if(githubMode)return githubRpc(name,arg);return new Promise((resolve,reject)=>{
-    if(!window.google?.script?.run)return reject(Error('請使用 Google Apps Script 的正式評選網址；本機與 GitHub 頁面僅可預覽。'));
-    const timer=setTimeout(()=>reject(Error('連線逾時，請重新同步確認；草稿仍保留')),45000);
-    google.script.run.withSuccessHandler(v=>{clearTimeout(timer);resolve(v);}).withFailureHandler(e=>{clearTimeout(timer);reject(e);})[name](arg);
-  });}
-  function init(){
-    let selected='';try{selected=localStorage.getItem('3q_current_judge')||'';}catch{}
-    if([...$('judgeSelect').options].some(o=>o.value===selected))$('judgeSelect').value=selected;
-    handleJudgeChange();
-  }
-  function handleJudgeChange(){
-    if(busy)return;currentJudge=$('judgeSelect').value;currentCategory='AQ';scores={};savedStatus={};versions={};requests={};loaded=false;
-    try{localStorage.setItem('3q_current_judge',currentJudge);scores=JSON.parse(localStorage.getItem(getStorageKeyScores(currentJudge))||'{}')||{};requests=JSON.parse(localStorage.getItem(metaKey(currentJudge))||'{}')||{};
-      // Import only drafts that already belong to this judge; never trust old completion flags.
-      const old=JSON.parse(localStorage.getItem('qingxi-3q:'+CONFIG.eventId+':'+currentJudge)||'null');
-      if(old)CATEGORY_FLOW.forEach(c=>Object.entries(old[c]?.scores||{}).forEach(([id,v])=>{if(scores[id]===undefined)scores[id]=v;}));
-    }catch{scores={};requests={};}
-    renderCards();if(previewMode)notify('本機預覽：可自由切換 AQ、EQ、MQ 查看全部候選人；正式送出請使用評選網址。');else if(currentJudge)syncJudge();else notify('請先選擇評審姓名。');
-  }
-  async function syncJudge(){
-    if(!currentJudge||busy)return;busy=true;loaded=false;updateUIStatus();notify('正在讀取雲端進度…');
-    try{
-      const result=await rpc('getJudgeStatus',currentJudge);
-      if(result.eventId!==CONFIG.eventId)throw Error('活動版本不同，請重新整理');
-      CATEGORY_FLOW.forEach(c=>{
-        savedStatus[c]=result.savedStatus[c]===true;versions[c]=result.versions[c];
-        Object.entries(result.scores[c]).forEach(([id,v])=>{if(savedStatus[c]||scores[id]===undefined)scores[id]=v;});
-        if(savedStatus[c])delete requests[c];
-      });cloudOpen=result.open;loaded=true;currentCategory=next()||'MQ';persist();
-      notify(result.open?'雲端同步完成，請依序完成各類評分。':'目前停止收件；草稿仍保留。');
-    }catch(e){notify('同步失敗：'+(e.message||e));}
-    finally{busy=false;renderCards();}
-  }
-  function switchCategory(cat){
-    if(busy||!CATEGORY_FLOW.includes(cat)||(!previewMode&&!savedStatus[cat]&&cat!==next()))return;
-    currentCategory=cat;renderCards();window.scrollTo({top:0,behavior:'smooth'});
-  }
-  function renderCards(){
-    $('cardsList').replaceChildren();$('categoryHeading').textContent=currentCategory+' '+titles[currentCategory];
-    candidatesData[currentCategory].forEach(s=>{
-      const card=document.createElement('article');card.className='card';
-      card.innerHTML='<div class="card-top"><div><span class="stu-title"></span><span class="stu-class"></span></div><div class="stu-teacher"></div></div><div class="tag-group"></div><div class="story-content"></div><div class="score-box"><label class="score-title">評審給分 (0～100)：</label><input type="number" inputmode="decimal" step="any" min="0" max="100" class="input-score" placeholder="未評"></div>';
-      card.querySelector('.stu-title').textContent=s.name;card.querySelector('.stu-class').textContent=s.class;card.querySelector('.stu-teacher').textContent='推薦師長：'+s.teacher;
-      s.reasons.forEach(r=>{const tag=document.createElement('span');tag.className='tag-item';tag.textContent='✔ '+r;card.querySelector('.tag-group').append(tag);});
-      card.querySelector('.story-content').textContent=s.story;
-      const input=card.querySelector('input');input.id='score-'+s.id;input.value=scores[s.id]??'';card.querySelector('label').htmlFor=input.id;
-      input.oninput=()=>{if(busy||savedStatus[currentCategory])return;scores[s.id]=input.value;delete requests[currentCategory];persist();updateUIStatus();};$('cardsList').append(card);
-    });updateUIStatus();
-  }
-  function updateUIStatus(){
-    const active=next(),done=loaded&&CATEGORY_FLOW.every(c=>savedStatus[c]);
-    CATEGORY_FLOW.forEach(c=>{const tab=$('tab-'+c);tab.textContent=savedStatus[c]?c+' ✓ 已完成':c+' '+count(c)+' / '+candidatesData[c].length;tab.disabled=busy||(!previewMode&&(!currentJudge||(!savedStatus[c]&&c!==active)));tab.classList.toggle('active',c===currentCategory);tab.classList.toggle('is-saved',!!savedStatus[c]);});
-    $('catProgressText').textContent=currentCategory+' 評分進度：'+count(currentCategory)+' / '+candidatesData[currentCategory].length;
-    $('submitCatBtn').disabled=busy||!loaded||!cloudOpen||!currentJudge||!!savedStatus[currentCategory]||currentCategory!==active||count(currentCategory)!==candidatesData[currentCategory].length;
-    $('submitCatBtn').title=previewMode?'本機檔案不能送出，請使用 GitHub 評選網址':!currentJudge?'請先選擇姓名':!loaded?'請先完成雲端同步':!cloudOpen?'目前停止收件':count(currentCategory)!==candidatesData[currentCategory].length?'請填齊全部有效分數':'';
-    document.querySelector('.progress-sub').textContent=busy?'傳送中，請稍候':$('submitCatBtn').title||'已填分數自動暫存於這部裝置';
-    $('submitCatBtn').textContent=busy?'傳送中…':savedStatus[currentCategory]?currentCategory+' 已完成 ✓':'完成 '+currentCategory+' 評分並送出';
-    $('judgeSelect').disabled=busy;$('syncJudge').disabled=previewMode||busy||!currentJudge;
-    document.querySelectorAll('.input-score').forEach(el=>el.disabled=busy||!currentJudge||!!savedStatus[currentCategory]||currentCategory!==active);
-    $('categoryLockedBanner').style.display=savedStatus[currentCategory]?'block':'none';$('categoryLockedBanner').textContent='✅ '+currentCategory+' 評分已成功送出並鎖定。';
-    $('allFinishedBanner').style.display=done?'block':'none';
-  }
-  async function submitCurrentCategory(){
-    if($('submitCatBtn').disabled||busy)return;
-    const cat=currentCategory,judge=currentJudge;
-    if(!requests[cat])requests[cat]=crypto.randomUUID?crypto.randomUUID():Date.now()+'-'+Math.random().toString(36).slice(2);
-    persist();busy=true;updateUIStatus();notify('傳送中…');
-    try{
-      const result=await rpc('saveCategoryScores',{judge,category:cat,eventId:CONFIG.eventId,baseVersion:versions[cat]||'',requestId:requests[cat],records:candidatesData[cat].map(s=>({id:s.id,score:Number(scores[s.id])}))});
-      if(result?.success!==true){if(result?.code==='CONFLICT')loaded=false;throw Error(result?.message||'後端未確認成功');}
-      savedStatus[cat]=true;versions[cat]=result.version;delete requests[cat];persist();notify('✅ '+cat+' 評分已成功送出'+(result.warning?'；'+result.warning:''));currentCategory=next()||'MQ';
-      window.scrollTo({top:0,behavior:'smooth'});
-    }catch(e){notify('尚未確認送出成功：'+(e.message||e)+'。已填分數仍保留，請重試或重新同步。');}
-    finally{busy=false;renderCards();}
-  }
-  window.onload=init;
+function connectBridge() {
+  if (bridgeReady) return bridgeReady;
+  bridgeReady = new Promise((resolve, reject) => {
+    bridgeChannel = crypto.randomUUID();
+    const timer = setTimeout(() => {
+      if (bridgeListener) window.removeEventListener('message', bridgeListener);
+      bridgeFrame?.remove();
+      bridgeSource = null;
+      bridgeReady = null;
+      reject(Error('無法連接評分服務，請確認 Apps Script 已更新部署，或稍後按重新同步；已填分數仍保留。'));
+    }, 30000);
 
-</script></body></html>
+    bridgeListener = e => {
+      const m = e.data;
+      if (!m || m.protocol !== 'qingxi-3q-bridge-v1' || m.channel !== bridgeChannel || !googleOrigin(e.origin)) return;
+      if (m.type === 'ready' && !bridgeSource) {
+        bridgeSource = e.source;
+        bridgeOrigin = e.origin;
+        clearTimeout(timer);
+        resolve();
+        return;
+      }
+      if (e.source !== bridgeSource || e.origin !== bridgeOrigin || m.type !== 'result') return;
+      const pending = bridgePending.get(m.id);
+      if (!pending) return;
+      bridgePending.delete(m.id);
+      clearTimeout(pending.timer);
+      if (m.ok === true) pending.resolve(m.result);
+      else pending.reject(Error(m.error || '雲端服務回覆失敗'));
+    };
+
+    window.addEventListener('message', bridgeListener);
+    bridgeFrame = document.createElement('iframe');
+    bridgeFrame.title = '評分資料連線';
+    bridgeFrame.hidden = true;
+    bridgeFrame.src = GAS_URL + '?page=bridge&channel=' + encodeURIComponent(bridgeChannel);
+    document.body.append(bridgeFrame);
+  });
+  return bridgeReady;
+}
+
+async function githubRpc(name, arg) {
+  if (!['getJudgeStatus', 'saveCategoryScores'].includes(name)) throw Error('不支援此操作');
+  await connectBridge();
+  return new Promise((resolve, reject) => {
+    const id = crypto.randomUUID();
+    const timer = setTimeout(() => {
+      bridgePending.delete(id);
+      reject(Error('尚未收到儲存確認，請重新同步確認；草稿仍保留。'));
+    }, 45000);
+    bridgePending.set(id, { resolve, reject, timer });
+    bridgeSource.postMessage({ protocol: 'qingxi-3q-bridge-v1', channel: bridgeChannel, type: 'call', id, name, arg }, bridgeOrigin);
+  });
+}
+
+const previewMode = !window.google?.script?.run && !githubMode;
+const $ = id => document.getElementById(id);
+const titles = { AQ: '逆境智商達人', EQ: '情緒智商達人', MQ: '道德智商達人' };
+const valid = v => v !== '' && v !== null && v !== undefined && Number.isFinite(Number(v)) && Number(v) >= 0 && Number(v) <= 100;
+const getStorageKeyScores = j => '3q_scores_' + j.trim();
+const metaKey = j => '3q_request_' + j.trim();
+const count = c => candidatesData[c].filter(s => valid(scores[s.id])).length;
+const next = () => CATEGORY_FLOW.find(c => !savedStatus[c]);
+
+function notify(text) { $('flowMessage').textContent = text; }
+
+function persist() {
+  if (!currentJudge) return;
+  try {
+    localStorage.setItem(getStorageKeyScores(currentJudge), JSON.stringify(scores));
+    localStorage.setItem(metaKey(currentJudge), JSON.stringify(requests));
+  } catch {
+    notify('本機暫存不可用，請保持頁面開啟並完成送出。');
+  }
+}
+
+function rpc(name, arg) {
+  if (githubMode) return githubRpc(name, arg);
+  return new Promise((resolve, reject) => {
+    if (!window.google?.script?.run) return reject(Error('請使用正式評選網址；本機僅供介面預覽。'));
+    const timer = setTimeout(() => reject(Error('連線逾時，請重新同步確認；草稿仍保留')), 45000);
+    google.script.run
+      .withSuccessHandler(v => { clearTimeout(timer); resolve(v); })
+      .withFailureHandler(e => { clearTimeout(timer); reject(e); })[name](arg);
+  });
+}
+
+function init() {
+  let selected = '';
+  try { selected = localStorage.getItem('3q_current_judge') || ''; } catch {}
+  if ([...$('judgeSelect').options].some(o => o.value === selected)) $('judgeSelect').value = selected;
+  handleJudgeChange();
+}
+
+function handleJudgeChange() {
+  if (busy) return;
+  currentJudge = $('judgeSelect').value;
+  currentCategory = 'AQ';
+  scores = {};
+  savedStatus = {};
+  versions = {};
+  requests = {};
+  loaded = false;
+
+  try {
+    localStorage.setItem('3q_current_judge', currentJudge);
+    // 只讀取屬於當前評審本地的草稿
+    scores = JSON.parse(localStorage.getItem(getStorageKeyScores(currentJudge)) || '{}') || {};
+    requests = JSON.parse(localStorage.getItem(metaKey(currentJudge)) || '{}') || {};
+  } catch {
+    scores = {};
+    requests = {};
+  }
+
+  renderCards();
+  if (previewMode) {
+    notify('本機預覽：可自由切換 AQ、EQ、MQ；正式送出請使用正式網址。');
+  } else if (currentJudge) {
+    syncJudge();
+  } else {
+    notify('請先選擇評審姓名。');
+  }
+}
+
+// 安全同步：不再接收 scores，只更新類別完成狀態
+async function syncJudge() {
+  if (!currentJudge || busy) return;
+  busy = true;
+  loaded = false;
+  updateUIStatus();
+  notify('正在讀取雲端進度…');
+
+  try {
+    const result = await rpc('getJudgeStatus', currentJudge);
+    if (result.eventId !== CONFIG.eventId) throw Error('活動版本不同，請重新整理');
+
+    CATEGORY_FLOW.forEach(c => {
+      savedStatus[c] = result.savedStatus[c] === true;
+      versions[c] = result.versions ? result.versions[c] : '';
+      // 若該類別已送出完成，清理本機暫存分數以確保隱私無殘留
+      if (savedStatus[c]) {
+        delete requests[c];
+        candidatesData[c].forEach(s => { delete scores[s.id]; });
+      }
+    });
+
+    cloudOpen = result.open;
+    loaded = true;
+    currentCategory = next() || 'MQ';
+    persist();
+    notify(result.open ? '雲端同步完成，請依序完成各類評分。' : '目前停止收件；草稿仍保留。');
+  } catch (e) {
+    notify('同步失敗：' + (e.message || e));
+  } finally {
+    busy = false;
+    renderCards();
+  }
+}
+
+function switchCategory(cat) {
+  if (busy || !CATEGORY_FLOW.includes(cat) || (!previewMode && !savedStatus[cat] && cat !== next())) return;
+  currentCategory = cat;
+  renderCards();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function renderCards() {
+  const container = $('cardsList');
+  container.replaceChildren();
+  $('categoryHeading').textContent = currentCategory + ' ' + titles[currentCategory];
+
+  // 安全核心：已完成類別直接顯示確認卡片，絕不顯示舊分數欄位
+  if (savedStatus[currentCategory]) {
+    const lockedCard = document.createElement('div');
+    lockedCard.className = 'category-locked-banner';
+    lockedCard.innerHTML = `
+      <h3>✅ ${currentCategory} ${titles[currentCategory]} 已完成評分並送出</h3>
+      <p style="color: #166534; font-size: 0.95rem; margin-top: 4px;">評分資料已妥善加密保存於後端試算表，進入唯讀鎖定狀態。</p>
+    `;
+    container.append(lockedCard);
+    updateUIStatus();
+    return;
+  }
+
+  // 未完成類別才渲染學生名單與分數輸入框
+  candidatesData[currentCategory].forEach(s => {
+    const card = document.createElement('article');
+    card.className = 'card';
+    card.innerHTML = `
+      <div class="card-top">
+        <div><span class="stu-title"></span><span class="stu-class"></span></div>
+        <div class="stu-teacher"></div>
+      </div>
+      <div class="tag-group"></div>
+      <div class="story-content"></div>
+      <div class="score-box">
+        <label class="score-title">評審給分 (0～100)：</label>
+        <input type="number" inputmode="decimal" step="any" min="0" max="100" class="input-score" placeholder="未評">
+      </div>
+    `;
+
+    card.querySelector('.stu-title').textContent = s.name;
+    card.querySelector('.stu-class').textContent = s.class;
+    card.querySelector('.stu-teacher').textContent = '推薦師長：' + s.teacher;
+    s.reasons.forEach(r => {
+      const tag = document.createElement('span');
+      tag.className = 'tag-item';
+      tag.textContent = '✔ ' + r;
+      card.querySelector('.tag-group').append(tag);
+    });
+    card.querySelector('.story-content').textContent = s.story;
+
+    const input = card.querySelector('input');
+    input.id = 'score-' + s.id;
+    input.value = scores[s.id] ?? '';
+    card.querySelector('label').htmlFor = input.id;
+
+    input.oninput = () => {
+      if (busy || savedStatus[currentCategory]) return;
+      scores[s.id] = input.value;
+      delete requests[currentCategory];
+      persist();
+      updateUIStatus();
+    };
+
+    container.append(card);
+  });
+  updateUIStatus();
+}
+
+function updateUIStatus() {
+  const active = next();
+  const done = loaded && CATEGORY_FLOW.every(c => savedStatus[c]);
+
+  CATEGORY_FLOW.forEach(c => {
+    const tab = $('tab-' + c);
+    tab.textContent = savedStatus[c] ? c + ' ✓ 已完成' : c + ' ' + count(c) + ' / ' + candidatesData[c].length;
+    tab.disabled = busy || (!previewMode && (!currentJudge || (!savedStatus[c] && c !== active)));
+    tab.classList.toggle('active', c === currentCategory);
+    tab.classList.toggle('is-saved', !!savedStatus[c]);
+  });
+
+  const isCurrentSaved = !!savedStatus[currentCategory];
+  $('catProgressText').textContent = isCurrentSaved
+    ? currentCategory + ' 評分：已完成送出 ✓'
+    : currentCategory + ' 評分進度：' + count(currentCategory) + ' / ' + candidatesData[currentCategory].length;
+
+  $('submitCatBtn').disabled = busy || !loaded || !cloudOpen || !currentJudge || isCurrentSaved || currentCategory !== active || count(currentCategory) !== candidatesData[currentCategory].length;
+  $('submitCatBtn').title = previewMode ? '本機檔案不能送出，請使用正式網址' : !currentJudge ? '請先選擇姓名' : !loaded ? '請先完成雲端同步' : !cloudOpen ? '目前停止收件' : count(currentCategory) !== candidatesData[currentCategory].length ? '請填齊全部有效分數' : '';
+  
+  document.querySelector('.progress-sub').textContent = busy ? '傳送中，請稍候' : isCurrentSaved ? '已安全存檔並鎖定' : $('submitCatBtn').title || '已填分數自動暫存於這部裝置';
+  $('submitCatBtn').textContent = busy ? '傳送中…' : isCurrentSaved ? currentCategory + ' 已完成 ✓' : '完成 ' + currentCategory + ' 評分並送出';
+  
+  $('judgeSelect').disabled = busy;
+  $('syncJudge').disabled = previewMode || busy || !currentJudge;
+  $('allFinishedBanner').style.display = done ? 'block' : 'none';
+}
+
+async function submitCurrentCategory() {
+  if ($('submitCatBtn').disabled || busy) return;
+  const cat = currentCategory, judge = currentJudge;
+
+  if (!requests[cat]) {
+    requests[cat] = crypto.randomUUID ? crypto.randomUUID() : Date.now() + '-' + Math.random().toString(36).slice(2);
+  }
+  persist();
+  busy = true;
+  updateUIStatus();
+  notify('傳送中…');
+
+  try {
+    const result = await rpc('saveCategoryScores', {
+      judge,
+      category: cat,
+      eventId: CONFIG.eventId,
+      baseVersion: versions[cat] || '',
+      requestId: requests[cat],
+      records: candidatesData[cat].map(s => ({ id: s.id, score: Number(scores[s.id]) }))
+    });
+
+    if (result?.success !== true) {
+      if (result?.code === 'CONFLICT') loaded = false;
+      throw Error(result?.message || '後端未確認成功');
+    }
+
+    savedStatus[cat] = true;
+    versions[cat] = result.version;
+    delete requests[cat];
+    // 送出成功後，徹底清理本機此向度暫存分數
+    candidatesData[cat].forEach(s => { delete scores[s.id]; });
+    persist();
+
+    notify('✅ ' + cat + ' 評分已成功送出' + (result.warning ? '；' + result.warning : ''));
+    currentCategory = next() || 'MQ';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  } catch (e) {
+    notify('尚未確認送出成功：' + (e.message || e) + '。已填分數仍保留，請重試或重新同步。');
+  } finally {
+    busy = false;
+    renderCards();
+  }
+}
+
+window.onload = init;
+</script>
+</body>
+</html>
